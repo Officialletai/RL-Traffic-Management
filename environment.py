@@ -74,10 +74,12 @@ class Graph:
         plt.show()
 
 
-# Test the graph
-graph = Graph(10)
-print(graph.num_nodes)
-print(graph.adjacency)
-graph.draw()
-print(np.all(graph.adjacency == graph.adjacency.T))
-graph.print_adjacency()
+
+if __name__ == '__main__':
+    # Test the graph
+    graph = Graph(10)
+    print(graph.num_nodes)
+    print(graph.adjacency)
+    graph.draw()
+    print(np.all(graph.adjacency == graph.adjacency.T))
+    graph.print_adjacency()

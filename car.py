@@ -51,7 +51,8 @@ class Car:
         
         return shortest_path
 
-london = Graph(10)
-car_0 = Car(0, london, 0, 9)
-shortest_path = car_0.path_finder()
-print(shortest_path)
+if __name__ == '__main__':
+    london = Graph(10)
+    car_0 = Car(0, london, 0, 9)
+    shortest_path = car_0.path_finder()
+    print(shortest_path)
