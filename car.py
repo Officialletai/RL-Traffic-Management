@@ -36,9 +36,9 @@ class Car:
         Get the car's current location.
         
         Returns:
-            tuple: The current node and the car's progress along the road to the next node.
+            tuple: The current node, the destination node, and the car's progress along the road to the next node.
         """
-        return self.current, self.road_progress
+        return self.current, self.next, self.road_progress
     
 
     def move(self, speed: float, light_green: bool):
