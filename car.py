@@ -1,3 +1,4 @@
+import random
 import networkx as nx
 from typing import List
 
@@ -29,6 +30,48 @@ class Car:
         self.road_progress = road_progress
         self.time = time
 
+
+    def get_location(self):
+        """
+        Get the car's current location.
+        
+        Returns:
+            tuple: The current node and the car's progress along the road to the next node.
+        """
+        return self.current, self.road_progress
+    
+
+    def move(self, speed: float, light_green: bool):
+        """
+        Move the car along its path.
+        
+        Args:
+            speed (float): The percentage of the road the car can traverse in one time unit.
+            light_green (bool): Whether the light at the next node is green.
+        """
+        self.road_progress += speed
+        if self.road_progress > 100:  # Ensure road progress does not exceed 100
+            self.road_progress = 100
+
+        # If the car has reached the end of the road and the light is green
+        if self.road_progress >= 100 and light_green:
+            self.time += 100 / speed  # Here, time is a measure of how many time units the car has been moving
+            self.road_progress = 0
+            self.current = self.next
+            self.path.pop(0)
+            if self.path:
+                self.next = self.path[1] if len(self.path) > 1 else None
+                self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
+            else:
+                self.next = None
+                self.road = None
+        elif not light_green and self.road_progress >= 100:
+            self.time += 1  # Still increment time even if the car is not moving
+        else:
+            self.time += 1
+
+
+
     def path_finder(self) -> List[int]:
         """
         Determines the shortest path from the car's origin to its destination using Dijkstra's algorithm.
@@ -50,9 +93,19 @@ class Car:
         shortest_path = nx.shortest_path(graph, source=self.origin, target=self.destination, weight='weight')
         
         return shortest_path
+    
+
 
 if __name__ == '__main__':
-    london = Graph(10)
-    car_0 = Car(0, london, 0, 9)
+    london = Graph(10) 
+    start = random.randrange(0, london.num_nodes - 1)
+    stop = random.randrange(0, london.num_nodes - 1)
+    while stop == start:
+        stop = random.randrange(0, london.num_nodes - 1)
+    car_0 = Car(0, london, start, stop)
     shortest_path = car_0.path_finder()
-    print(shortest_path)
+    print(car_0.current)
+    print(car_0.next)
+    print(car_0.path)
+    print(car_0.road)
+    print(car_0.time)
