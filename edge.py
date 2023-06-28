@@ -1,5 +1,5 @@
 class Edge:
-    def __init__(self, speed_limit, distance, additional_costs):
+    def __init__(self, speed_limit, distance, additional_costs=0):
         self.weight = (distance / speed_limit) + additional_costs
         self.speed_limit = speed_limit
         self.distance = distance
