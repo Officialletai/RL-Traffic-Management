@@ -3,6 +3,7 @@ import networkx as nx
 from typing import List
 
 import numpy as np
+from edge import Edge
 
 from environment import Graph
 
@@ -36,7 +37,7 @@ class Car:
         Get the car's current location.
         
         Returns:
-            tuple: The current node, the destination node, and the car's progress along the road to the next node.
+            tuple: The current node, the destination and the car's progress along the road to the next node.
         """
         return self.current, self.next, self.road_progress
     
@@ -83,7 +84,31 @@ class Car:
         # Create a copy of the adjacency matrix with Edge objects replaced by their weights
         # these weights should summarise the cost of the car going through the road
         # the algorithm will attempt to minimise the cost.
-        adjacency_weights = np.array([[edge.weight if edge != 0 else 0 for edge in row] for row in self.map.adjacency])
+        
+        # Initialize an empty list to store the rows of the new matrix
+        adjacency_weights = []
+
+        # Iterate over each row in the adjacency matrix
+        for row in self.map.adjacency:
+            # Initialize an empty list to store the values in the current row
+            new_row = []
+            
+            # Iterate over each item in the current row
+            for edge in row:
+                # If the item is an instance of the Edge class, add its weight to the new row
+                if isinstance(edge, Edge):
+                    new_row.append(float(edge.weight))
+                # If the item is not an instance of the Edge class (i.e., it's zero), add zero to the new row
+                else:
+                    new_row.append(0)
+            
+            # Add the new row to the new matrix
+            adjacency_weights.append(new_row)
+
+        #print(np.matrix(adjacency_weights))
+        # Convert the list of lists to a numpy array
+        adjacency_weights = np.array(adjacency_weights)
+
 
         # Convert the modified adjacency matrix to a NetworkX graph
         graph = nx.DiGraph(adjacency_weights)
