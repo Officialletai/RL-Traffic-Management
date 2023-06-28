@@ -43,19 +43,19 @@ class Graph:
 
         return adjacency_matrix
 
-    def print_adjacency(self):
+    def return_adjacency(self):
         """
-        Print the adjacency matrix with weights.
+        Return the adjacency matrix with weights.
         """
-        print_matrix = np.empty((self.num_nodes, self.num_nodes))
+        return_matrix = np.empty((self.num_nodes, self.num_nodes))
         for i in range(len(self.adjacency)):
             for j in range(len(self.adjacency)):
                 if isinstance(self.adjacency[i][j], Edge): 
-                    print_matrix[i][j] = self.adjacency[i][j].weight
+                    return_matrix[i][j] = self.adjacency[i][j].weight
                 else:
-                    print_matrix[i][j] = self.adjacency[i][j]
+                    return_matrix[i][j] = self.adjacency[i][j]
 
-        print(print_matrix) 
+        return return_matrix
 
     def draw(self):
         """
