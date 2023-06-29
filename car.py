@@ -43,7 +43,7 @@ class Car:
         return self.current, self.next, self.road_progress
     
 
-    def move(self, speed: float, light_green: bool):
+    def move(self, light_green: bool):
         """
         Move the car along its path.
         
@@ -51,6 +51,8 @@ class Car:
             speed (float): The percentage of the road the car can traverse in one time unit.
             light_green (bool): Whether the light at the next node is green.
         """
+        speed = (1 / self.path_cost[0]) * 100
+
         self.road_progress += speed
         if self.road_progress > 100:  # Ensure road progress does not exceed 100
             self.road_progress = 100
@@ -61,6 +63,7 @@ class Car:
             self.road_progress = 0
             self.current = self.next
             self.path.pop(0)
+            self.path_cost.pop(0)
             if self.path:
                 self.next = self.path[1] if len(self.path) > 1 else None
                 self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
