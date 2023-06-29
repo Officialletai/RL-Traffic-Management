@@ -89,7 +89,7 @@ class Car:
 
     def path_finder(self) -> List[int]:
         """
-        Determines the shortest path from the car's origin to its destination using Dijkstra's algorithm.
+        Determines the shortest path from the car's origin to its destination using A* algorithm.
 
         Returns:
             List[Edge objects]: The shortest path as a list of nodes.
@@ -128,8 +128,8 @@ class Car:
         graph = nx.DiGraph(adjacency_weights)
 
         
-        # Calculate the shortest path from origin to destination
-        shortest_path = nx.shortest_path(graph, source=self.origin, target=self.destination, weight='weight')
+        # Calculate the shortest path from origin to destination via A* 
+        shortest_path = nx.astar_path(graph, source=self.origin, target=self.destination, weight='weight')
         
         return shortest_path
     
