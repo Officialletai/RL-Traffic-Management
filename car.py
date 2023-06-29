@@ -1,6 +1,6 @@
 import random
 import networkx as nx
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from edge import Edge
@@ -24,7 +24,8 @@ class Car:
         self.map = map_
         self.origin = origin
         self.destination = destination
-        self.path = self.path_finder()  
+        self.path = self.path_finder()
+        self.path_cost = self.get_path_weights()
         self.current = origin  
         self.next = self.path[1] if self.path else None
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
@@ -119,7 +120,29 @@ class Car:
         
         return shortest_path
     
+    def get_path_weights(self) -> List[Tuple[Edge, float]]:
+        """
+        Given the shortest path as a list of nodes, return a list of tuples. Each tuple contains an edge (i.e., 
+        an Edge object) and its corresponding weight.
+        """
+        
+        shortest_path = self.path
 
+        # Initialize an empty list to store the weights
+        path_weights = []
+        
+        # Iterate over each pair of nodes in the shortest path
+        for i in range(len(shortest_path) - 1):
+            # Get the current node and the next node in the path
+            node1, node2 = shortest_path[i], shortest_path[i + 1]
+            
+            # Get the Edge object connecting the two nodes
+            edge = self.map.adjacency[node1][node2]
+            
+            # Add the edge weight to the list
+            path_weights.append((edge.weight[0]))
+            
+        return path_weights
 
 if __name__ == '__main__':
     london = Graph(10) 
@@ -134,3 +157,4 @@ if __name__ == '__main__':
     print(car_0.path)
     print(car_0.road)
     print(car_0.time)
+    print(car_0.path_cost)

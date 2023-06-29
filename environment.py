@@ -19,6 +19,9 @@ class Graph:
         weight_dist: Not used in this implementation.
         """
 
+        # Set the random seed
+        random.seed(28062023)
+
         # mu_distance and sigma_distance are parameters for the normal distribution from which road lengths are drawn
         self.mu_distance = 50
         self.sigma_distance = 15
