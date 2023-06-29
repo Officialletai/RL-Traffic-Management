@@ -48,32 +48,42 @@ class Car:
         Move the car along its path.
         
         Args:
-            speed (float): The percentage of the road the car can traverse in one time unit.
             light_green (bool): Whether the light at the next node is green.
         """
+        # Compute the car's speed based on the current road's weight (cost)
         speed = (1 / self.path_cost[0]) * 100
 
+        # Move the car along the current road at the computed speed
         self.road_progress += speed
-        if self.road_progress > 100:  # Ensure road progress does not exceed 100
+
+        # Ensure road progress does not exceed 100
+        if self.road_progress > 100:  
             self.road_progress = 100
 
         # If the car has reached the end of the road and the light is green
         if self.road_progress >= 100 and light_green:
+            # Update the time spent on the road
             self.time += 100 / speed  # Here, time is a measure of how many time units the car has been moving
             self.road_progress = 0
             self.current = self.next
             self.path.pop(0)
             self.path_cost.pop(0)
+
+            # If there's still path left to traverse
             if self.path:
+                # Update the next destination node and the current road
                 self.next = self.path[1] if len(self.path) > 1 else None
                 self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
             else:
                 self.next = None
                 self.road = None
         elif not light_green and self.road_progress >= 100:
-            self.time += 1  # Still increment time even if the car is not moving
-        else:
+            # If the light is red but the car has reached the end of the road, increment time even if the car is not moving
             self.time += 1
+        else:
+            # If the car hasn't reached the end of the road, increment time as it is still moving
+            self.time += 1
+
 
 
 
