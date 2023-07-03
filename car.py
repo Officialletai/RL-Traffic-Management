@@ -20,6 +20,11 @@ class Car:
             road_progress (int, optional): The progress of the car along its current road. Defaults to 0.
             time (int, optional): The time elapsed since the car started its journey. Defaults to 0.
         """
+        
+        
+        # Set the random seed
+        random.seed(28062023)
+        
         self.id = car_id 
         self.map = map_
         self.origin = origin

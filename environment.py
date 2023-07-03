@@ -97,9 +97,11 @@ class Graph:
 
 if __name__ == '__main__':
     # Test the graph
-    graph = Graph(10)
-    print(graph.num_nodes)
-    print(graph.adjacency)
-    graph.draw()
+    graph = Graph(10) # Creates instance of graph with 10 different nodes
+    print("Nodes = ", graph.num_nodes) 
+    # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))
     print(graph.return_adjacency())
+    graph.draw()
+    
+    
