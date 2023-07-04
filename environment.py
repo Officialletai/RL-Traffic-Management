@@ -31,9 +31,8 @@ class Graph:
         self.speed_upper = [60, 70]
 
         self.num_nodes = num_nodes
-        self.sparsity_dist = sparsity_dist
+        self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
-
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
@@ -93,7 +92,32 @@ class Graph:
         nx.draw(graph, pos, with_labels=True, node_color='lightblue', node_size=500, edge_color='gray')
         plt.title("Graph Visualization")
         plt.show()
-
+        
+    # Creates an adjacency matrix where in the third dimension indicates the number of traffic lights located on an edge.
+    # Each row indicates a node, where the edge location at the row represent the traffic lights at the node
+    def traffic_light_locations(self): 
+        num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
+        binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
+        
+        # Adjacency matrix of traffic lights. Elements show number of traffic lights at an edge
+        traffic_light_adjacency_2D = np.zeros([self.num_nodes, self.num_nodes])
+        for i, num in enumerate(num_intersections-1):
+            traffic_light_adjacency_2D[i, binary_adjacency[i] == 1] = num
+            
+        # Adjacency matrix of traffic lights, however 3 dimensional.
+        # TODO - Broken, too braindead to fix, can probably remove
+        traffic_light_adjacency_3D = np.zeros((self.num_nodes, self.num_nodes, np.max(num_intersections-1))) # Third dimension refers to the traffic lights
+        # for i, num in enumerate(num_intersections - 1):
+        #     traffic_light_adjacency_3D[i, :, :num] = traffic_light_adjacency_3D[i, :, np.newaxis].astype(int)
+        
+        
+        # 3D matrix, where only the diagonal of the column and depth rows are filled in. 
+        traffic_light_adjacency_3D_diagonal = np.zeros((self.num_nodes, self.num_nodes, self.num_nodes))
+        for row in range(self.num_nodes):
+            np.fill_diagonal(traffic_light_adjacency_3D_diagonal[row], traffic_light_adjacency_2D[row])
+        return traffic_light_adjacency_2D
+    
+        # TODO - Create a square 3D  matrix from the adjacency matrix.
 
 if __name__ == '__main__':
     # Test the graph
@@ -103,5 +127,6 @@ if __name__ == '__main__':
     print(np.all(graph.adjacency == graph.adjacency.T))
     print(graph.return_adjacency())
     graph.draw()
-    
+    graph.traffic_light_locations()
+
     
