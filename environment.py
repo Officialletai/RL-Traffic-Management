@@ -3,6 +3,7 @@ import random
 import networkx as nx
 import matplotlib.pyplot as plt
 from edge import Edge
+from light import Light
 
 class Graph:
     """
@@ -34,7 +35,9 @@ class Graph:
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
         self.traffic_light_matrix = self.traffic_light_locations()
-        
+        self.traffic_light_instances = self.generate_traffic_light_instances()
+
+
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
@@ -129,11 +132,23 @@ class Graph:
         traffic_light_adjacency_3D = np.repeat(binary_adjacency[:, :, np.newaxis], self.num_nodes, axis=2) # Repeat along the third axis
         traffic_light_adjacency_3D_axes_swapped = np.swapaxes(traffic_light_adjacency_3D, 1, 2) # Swap axes so that the depth is repeated along the columns
         traffic_light_adjacency_3D = traffic_light_adjacency_3D_axes_swapped * traffic_light_adjacency_3D # Places zeros where the 2D matrix has zeros
-        for row in range(traffic_light_adjacency_3D.shape[0]):
+        for row in range(traffic_light_adjacency_3D.shape[0]):  # Emptying the diagonals
             np.fill_diagonal(traffic_light_adjacency_3D[row], 0)
-        return traffic_light_adjacency_3D
-        
 
+        return traffic_light_adjacency_3D
+    
+    # Now creating a matrix of instances of all traffic lights
+    def generate_traffic_light_instances(self):
+        traffic_light_instances = np.empty_like(self.traffic_light_matrix, dtype=object)
+
+        for i in range(self.traffic_light_matrix.shape[0]):
+            for j in range(self.traffic_light_matrix.shape[1]):
+                for k in range(self.traffic_light_matrix.shape[2]):
+                    if self.traffic_light_matrix[i,j,k] != 0:
+                        traffic_light_instances[i,j,k] = Light(0)
+        return traffic_light_instances
+    
+    
 if __name__ == '__main__':
     # Test the graph
     graph = Graph(10) # Creates instance of graph with 10 different nodes
@@ -143,5 +158,4 @@ if __name__ == '__main__':
     print(graph.return_adjacency())
     graph.draw()
     traffic_lights = graph.traffic_light_locations()
-
-    
+    instance = graph.traffic_light_instances
