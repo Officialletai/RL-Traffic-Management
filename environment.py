@@ -9,14 +9,12 @@ class Graph:
     Graph is a class representing an undirected, weighted graph.
     """
 
-    def __init__(self, num_nodes=10, sparsity_dist=[0.65, 0.35], max_weight=5, weight_dist=[0.5, 0.2, 0.1, 0.1, 0.1]):
+    def __init__(self, num_nodes=10, sparsity_dist=[0.65, 0.35]):
         """
         Initialize a graph.
 
         num_nodes: Number of nodes in the graph.
         sparsity_dist: Probability mass function for whether an edge exists or not.
-        max_weight: Not used in this implementation.
-        weight_dist: Not used in this implementation.
         """
 
         # Set the random seed
@@ -30,6 +28,8 @@ class Graph:
         self.speed_lower = [20, 30]
         self.speed_upper = [60, 70]
 
+        self.max_edge = 4
+
         self.num_nodes = num_nodes
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
@@ -41,12 +41,21 @@ class Graph:
         """
         adjacency_matrix = np.empty((self.num_nodes, self.num_nodes), dtype=object)
 
+        # Keep track of the number of edges per node
+        edge_count = [0 for i in range(self.num_nodes)]
+
         # Fill adjacency_matrix with Edges (or 0s where no edge exists)
         for i in range(self.num_nodes):
             for j in range(i, self.num_nodes):
                 if i == j:
                     adjacency_matrix[i][j] = 0
                 else:
+                    # Skip edge creation if either node has max number of nodes
+                    if edge_count[i] >= self.max_edge or edge_count[j] >= self.max_edge:
+                        adjacency_matrix[i][j] = 0
+                        adjacency_matrix[j][i] = 0
+                        continue
+
                     # Sample a road length from a normal distribution
                     random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
                     # min road distance is 10km
@@ -62,6 +71,10 @@ class Graph:
                     edge_or_not = random.choices([0, Edge(speed_limit, distance)], weights=self.sparsity_dist)[0]
                     adjacency_matrix[i][j] = edge_or_not
                     adjacency_matrix[j][i] = edge_or_not
+
+                    if edge_or_not != 0:
+                        edge_count[i] += 1
+                        edge_count[j] += 1
 
         return adjacency_matrix
 
