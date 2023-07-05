@@ -33,6 +33,8 @@ class Graph:
         self.num_nodes = num_nodes
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
+        self.traffic_light_matrix = self.traffic_light_locations()
+        
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
@@ -100,22 +102,24 @@ class Graph:
         binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
         
         # Adjacency matrix of traffic lights. Elements show number of traffic lights at an edge
-        traffic_light_adjacency_2D = np.zeros([self.num_nodes, self.num_nodes])
-        for i, num in enumerate(num_intersections-1):
-            traffic_light_adjacency_2D[i, binary_adjacency[i] == 1] = num
+        # traffic_light_adjacency_2D = np.zeros([self.num_nodes, self.num_nodes])
+        # for i, num in enumerate(num_intersections-1):
+        #     traffic_light_adjacency_2D[i, binary_adjacency[i] == 1] = num
             
-        # Adjacency matrix of traffic lights, however 3 dimensional.
-        traffic_light_adjacency_3D = np.zeros((self.num_nodes, self.num_nodes, np.max(num_intersections-1))) # Third dimension refers to the traffic lights
-        for i, num in enumerate(num_intersections - 1):
-            traffic_light_adjacency_3D[i, :, :num] = binary_adjacency[i, :, np.newaxis].astype(int)
-        
-        
-        # 3D matrix, where only the diagonal of the column and depth rows are filled in. 
-        # traffic_light_adjacency_3D_diagonal = np.zeros((self.num_nodes, self.num_nodes, self.num_nodes))
-        # for row in range(self.num_nodes):
-        #     np.fill_diagonal(traffic_light_adjacency_3D_diagonal[row], traffic_light_adjacency_2D[row])
-        return traffic_light_adjacency_3D
     
+        # 3D traffic lights matrix to show connectivity
+        # Current intersection (node) is the row
+        # The edge that the car is travelling from (previous node) is the column
+        # The edge that the car is travelling to is the depth
+        # Traffic lights only exist for combinations where the previous node can go to the next node
+        # There are no traffic lights at an end node (only 1 connection/intersection)
+        traffic_light_adjacency_3D = np.repeat(binary_adjacency[:, :, np.newaxis], self.num_nodes, axis=2) # Repeat along the third axis
+        traffic_light_adjacency_3D_axes_swapped = np.swapaxes(traffic_light_adjacency_3D, 1, 2) # Swap axes so that the depth is repeated along the columns
+        traffic_light_adjacency_3D = traffic_light_adjacency_3D_axes_swapped * traffic_light_adjacency_3D # Places zeros where the 2D matrix has zeros
+        for row in range(traffic_light_adjacency_3D.shape[0]):
+            np.fill_diagonal(traffic_light_adjacency_3D[row], 0)
+        return traffic_light_adjacency_3D
+        
 
 if __name__ == '__main__':
     # Test the graph
@@ -125,6 +129,6 @@ if __name__ == '__main__':
     print(np.all(graph.adjacency == graph.adjacency.T))
     print(graph.return_adjacency())
     graph.draw()
-    graph.traffic_light_locations()
+    traffic_lights = graph.traffic_light_locations()
 
     
