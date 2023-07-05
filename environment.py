@@ -36,7 +36,7 @@ class Graph:
         self.adjacency = self.generate()
         self.traffic_light_matrix = self.traffic_light_locations()
         self.traffic_light_instances = self.generate_traffic_light_instances()
-
+        self.num_intersections,self.phase_array = self.intersection_edge_labeling()
 
     def generate(self):
         """
@@ -147,6 +147,23 @@ class Graph:
                     if self.traffic_light_matrix[i,j,k] != 0:
                         traffic_light_instances[i,j,k] = Light(0)
         return traffic_light_instances
+    
+    def intersection_edge_labeling(self):
+        num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
+        
+        binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
+        array_of_dictionaries = []
+        for row in binary_adjacency:
+            row_dict = {}
+            keys = 'abcd'
+            key_num = 0
+            for i, value in enumerate(row):
+                if value == 1:
+                    row_dict[keys[key_num]] = i
+                    key_num += 1
+            array_of_dictionaries.append(row_dict)
+        return num_intersections, array_of_dictionaries
+        
     
     
 if __name__ == '__main__':
