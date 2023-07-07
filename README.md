@@ -1,6 +1,9 @@
 # Traffic Management with Reinforcement Learning
 
-This project aims to build an environment to simulate a traffic management system and employ various reinforcement learning algorithms to optimize traffic flow. The simulation currently models a traffic network with roads, traffic lights, and intersections, allowing various algorithms to interact with the environment.
+This project aims to build an environment to simulate a traffic management system and employ various reinforcement learning algorithms to optimize traffic flow. The simulation currently models a traffic network with roads, traffic lights, and intersections, allowing various algorithms to interact with the environment. 
+
+Huge credits and thank you to William, Ishmail, and Samiul for starting and building everything so far with me.
+
 
 ## Project Structure
 
