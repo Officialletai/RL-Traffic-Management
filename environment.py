@@ -3,6 +3,7 @@ import random
 import networkx as nx
 import matplotlib.pyplot as plt
 from edge import Edge
+from node import Node
 from light import Light
 
 class Graph:
@@ -34,9 +35,11 @@ class Graph:
         self.num_nodes = num_nodes
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
+        self.nodes = self.generate_nodes()
+
         self.traffic_light_matrix = self.traffic_light_locations()
         self.traffic_light_instances = self.generate_traffic_light_instances()
-        self.num_intersections,self.phase_array = self.intersection_edge_labeling()
+        # self.num_intersections,self.phase_array = self.intersection_edge_labeling()
 
     def generate(self):
         """
@@ -94,7 +97,18 @@ class Graph:
                     return_matrix[i][j] = self.adjacency[i][j]
 
         return return_matrix
+    
+    def generate_nodes(self):
+        """
+        Initialises the node objects that form the graph in a dictionary
+        """
+        nodes = {}
 
+        for i in range(self.num_nodes):
+            nodes[str(i)] = Node(label=str(i), connections=self.adjacency[i], queues=None)
+        
+        return nodes
+    
     def draw(self):
         """
         Draw the graph using matplotlib.
@@ -148,21 +162,21 @@ class Graph:
                         traffic_light_instances[i,j,k] = Light(0)
         return traffic_light_instances
     
-    def intersection_edge_labeling(self):
-        num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
+    # def intersection_edge_labeling(self):
+    #     num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
         
-        binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
-        array_of_dictionaries = []
-        for row in binary_adjacency:
-            row_dict = {}
-            keys = 'abcd'
-            key_num = 0
-            for i, value in enumerate(row):
-                if value == 1:
-                    row_dict[keys[key_num]] = i
-                    key_num += 1
-            array_of_dictionaries.append(row_dict)
-        return num_intersections, array_of_dictionaries
+    #     binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
+    #     array_of_dictionaries = []
+    #     for row in binary_adjacency:
+    #         row_dict = {}
+    #         keys = 'abcd'
+    #         key_num = 0
+    #         for i, value in enumerate(row):
+    #             if value == 1:
+    #                 row_dict[keys[key_num]] = i
+    #                 key_num += 1
+    #         array_of_dictionaries.append(row_dict)
+    #     return num_intersections, array_of_dictionaries
         
     
     
