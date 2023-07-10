@@ -1,5 +1,13 @@
+from environment import Graph
+
+
 class Controller:
-    def __init__ (self):
+    def __init__ (self, map_=Graph):
+        
+        # we use -1 as the stopping move to end the turn
+        self.node_move_set = [i for i in range(map_.num_nodes)]
+        self.node_move_set.append(-1)
+
         self.four_way_move_set = self.get_four_way_phase()
         self.three_way_move_set = self.get_three_way_phase()
         self.two_way_move_set = self.get_two_way_phase()
@@ -120,3 +128,8 @@ class Controller:
 
         two_way_intersection = [phase_1, phase_2]
         return two_way_intersection
+    
+if __name__ == "__main__":
+    controller_test = Controller(Graph())
+    print(controller_test.node_move_set)
+    print(controller_test.four_way_move_set)

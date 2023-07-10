@@ -67,8 +67,7 @@ class Car:
 
         # If the car has reached the end of the road and the light is green
         if self.road_progress >= 100 and light_green:
-            # Update the time spent on the road
-            self.time += 100 / speed  # Here, time is a measure of how many time units the car has been moving
+
             self.road_progress = 0
             self.current = self.next
             self.path.pop(0)
@@ -82,12 +81,10 @@ class Car:
             else:
                 self.next = None
                 self.road = None
-        elif not light_green and self.road_progress >= 100:
-            # If the light is red but the car has reached the end of the road, increment time even if the car is not moving
-            self.time += 1
-        else:
-            # If the car hasn't reached the end of the road, increment time as it is still moving
-            self.time += 1
+
+        # no matter what, we increment time by one unit
+        self.time += 1
+            
 
 
 
