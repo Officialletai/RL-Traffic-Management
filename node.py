@@ -17,7 +17,7 @@ class Node:
         no ambiguity for the particular node/junction.
         """
         edge_labels = {}
-        keys = 'abcd'
+        keys = 'ABCD'
         key_num = 0
         for i, value in enumerate(self.connections):
             if isinstance(value, Edge): 
