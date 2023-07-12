@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from edge import Edge
 from node import Node
 from light import Light
-from controller import Controller
+# from controller import Controller
 
 class Graph:
     """
@@ -42,6 +42,8 @@ class Graph:
         self.traffic_light_instances = self.generate_traffic_light_instances()
         # self.num_intersections,self.phase_array = self.intersection_edge_labeling()
         self.intersections = self.get_intersections()
+        
+        
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
@@ -187,18 +189,18 @@ class Graph:
         num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
         return num_intersections        
     
-    def change_traffic_lights(self,node_number,phase_number):
-        cont = Controller() # Initialises controller
-        phase = cont.get_phase(self.intersections[node_number])[phase_number]
-        edge_label = self.nodes[str(node_number)].edge_labels
+    # def change_traffic_lights(self,node_number,phase_number):
+    #     cont = Controller() # Initialises controller
+    #     phase = cont.get_phase(self.intersections[node_number])[phase_number]
+    #     edge_label = self.nodes[str(node_number)].edge_labels
         
-        # Changes traffic light state for all combinations of edges (All traffic lights) at a node
-        keys = 'ABCD'
-        for i in keys[0:self.intersections[node_number]]:
-            for j in keys[0:self.intersections[node_number]]:
-                if i != j:
-                    self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
-                    print(self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
+    #     # Changes traffic light state for all combinations of edges (All traffic lights) at a node
+    #     keys = 'ABCD'
+    #     for i in keys[0:self.intersections[node_number]]:
+    #         for j in keys[0:self.intersections[node_number]]:
+    #             if i != j:
+    #                 self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
+    #                 print(self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
     
 if __name__ == '__main__':
     # Test the graph
@@ -210,4 +212,3 @@ if __name__ == '__main__':
     graph.draw()
     traffic_lights = graph.traffic_light_locations()
     instance = graph.traffic_light_instances
-    cont = Controller()

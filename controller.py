@@ -1,16 +1,16 @@
-# from environment import Graph
+from environment import Graph
 
 
 class Controller:
-    # def __init__ (self, map_=Graph):
-    def __init__ (self):
+    def __init__ (environment_object, map_=Graph):
+    # def __init__ (self):
         # we use -1 as the stopping move to end the turn
-        # self.node_move_set = [i for i in range(map_.num_nodes)]
-        # self.node_move_set.append(-1)
+        environment_object.node_move_set = [i for i in range(map_.num_nodes)]
+        environment_object.node_move_set.append(-1)
         # self.move_set = self.get_phase()
-        self.four_way_move_set = self.get_four_way_phase()
-        self.three_way_move_set = self.get_three_way_phase()
-        self.two_way_move_set = self.get_two_way_phase()
+        environment_object.four_way_move_set = environment_object.get_four_way_phase()
+        environment_object.three_way_move_set = environment_object.get_three_way_phase()
+        environment_object.two_way_move_set = environment_object.get_two_way_phase()
 
     def get_four_way_phase(self):
         # I am assuming that all directions are relative
@@ -136,10 +136,21 @@ class Controller:
         else:
             return 0
     
+    def change_traffic_lights(self,node_number,phase_number,environment_object=Graph):
+        phase = self.get_phase(environment_object.intersections[node_number])[phase_number]
+        edge_label = environment_object.nodes[str(node_number)].edge_labels
+    
+        # Changes traffic light state for all combinations of edges (All traffic lights) at a node
+        keys = 'ABCD'
+        for i in keys[0:environment_object.intersections[node_number]]:
+            for j in keys[0:environment_object.intersections[node_number]]:
+                if i != j:
+                    environment_object.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
+                    print(environment_object.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
+    
 
  
 if __name__ == "__main__":
-    # controller_test = Controller(Graph())
-    controller_test = Controller()
+    controller_test = Controller(Graph())
     # print(controller_test.node_move_set)
     print(controller_test.four_way_move_set)
