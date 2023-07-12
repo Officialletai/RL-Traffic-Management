@@ -54,8 +54,9 @@ class Node:
         for edge in self.pointers:
             edge_destinations = [car.next for car in self.queues[edge]]
             for pointer in self.pointers[edge]:
-                print(pointer)
+                # print(pointer)
                 # 
+                pass
 
 # it has degree queues
 # it has degree x (degree-1) traffic lights for fully defined case
