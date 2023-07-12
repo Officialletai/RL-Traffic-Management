@@ -106,7 +106,7 @@ class Graph:
         nodes = {}
 
         for i in range(self.num_nodes):
-            nodes[str(i)] = Node(label=str(i), connections=self.adjacency[i], queues=None)
+            nodes[str(i)] = Node(label=str(i), connections=self.adjacency[i])
         
         # Different attempts with the use of an array instead of a dictionary
         # nodes = []
