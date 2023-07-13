@@ -31,7 +31,7 @@ class Environment:
         self.map = Graph()
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
-        
+
         self.time = 0
         self.score = 0
 
@@ -42,9 +42,17 @@ class Environment:
             self.controller.change_traffic_lights(node, phase)
         
         for car in self.cars:
-            next_node = car.next
-            # get traffic light of next node
-            # car.move(traffic light color)
+            # if car can move (not arrived at destination)
+            if car.current:
+                current_node = car.current
+                previous_node = car.previous
+                next_node = car.next
+                # get traffic light of next node [row][column]
+                traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
+                traffic_light_state = traffic_light.state
+
+                # car.move(traffic light color)
+                car.move(traffic_light_state)
 
             pass
 

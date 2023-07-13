@@ -93,11 +93,10 @@ class Car:
             node = self.map.nodes[f'{self.current}']
             # get edge label of current node 
             mapping = node.edge_labels
-            # get translation from next node -> a/b/c/d
+            # get translation of next node -> a/b/c/d
             translation = list(mapping.keys())[list(mapping.values()).index(self.next)]
             # add car id to respective queue
             node.queues[translation].append(self.car_id)
-            pass
 
         # no matter what, we increment time by one unit
         self.time += 1
@@ -192,3 +191,16 @@ if __name__ == '__main__':
     translation = list(mapping.keys())[list(mapping.values()).index(car_0.next)]
     print(translation)
     print(car_0.map.nodes[f'{car_0.current}'].queues[translation])
+
+    car_0.move(True)
+    print(car_0.road_progress)
+    print(car_0.previous)
+    print(car_0.current)
+    print(car_0.next)
+    print(car_0.path)
+    car_0.move(True)
+    print(car_0.road_progress)
+    print(car_0.previous)
+    print(car_0.current)
+    print(car_0.next)
+    print(car_0.path)
