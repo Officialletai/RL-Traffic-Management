@@ -82,11 +82,13 @@ class Car:
                 self.next = None
                 self.road = None
 
+        elif self.road_progress >= 100 and not light_green:
+            # add car to queue for relevant node
+            pass
+
         # no matter what, we increment time by one unit
         self.time += 1
             
-
-
 
 
     def path_finder(self) -> List[int]:
