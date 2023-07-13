@@ -30,7 +30,8 @@ class Environment:
     def reset(self):
         self.map = Graph()
         self.cars = self.initialise_cars(num_cars=10)
-
+        self.controller = Controller(self.map)
+        
         self.time = 0
         self.score = 0
 

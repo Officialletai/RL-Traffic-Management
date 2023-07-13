@@ -36,7 +36,6 @@ class Car:
         self.current = self.path[1] if self.path else None
         self.next = self.path[2] if self.path else None
         
-
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
         self.road_progress = road_progress
         self.time = time
@@ -90,6 +89,14 @@ class Car:
 
         elif self.road_progress >= 100 and not light_green:
             # add car to queue for relevant node
+            # node = current node 
+            node = self.map.nodes[f'{self.current}']
+            # get edge label of current node 
+            mapping = node.edge_labels
+            # get translation from next node -> a/b/c/d
+            translation = list(mapping.keys())[list(mapping.values()).index(self.next)]
+            # add car id to respective queue
+            node.queues[translation].append(self.car_id)
             pass
 
         # no matter what, we increment time by one unit
@@ -177,7 +184,11 @@ if __name__ == '__main__':
     shortest_path = car_0.path_finder()
     print(car_0.previous)
     print(car_0.current)
+    print(car_0.next)
     print(car_0.path)
-    print(car_0.road)
-    print(car_0.time)
-    print(car_0.path_cost)
+
+    mapping = car_0.map.nodes[f'{car_0.current}'].edge_labels
+    print(mapping)
+    translation = list(mapping.keys())[list(mapping.values()).index(car_0.next)]
+    print(translation)
+    print(car_0.map.nodes[f'{car_0.current}'].queues[translation])
