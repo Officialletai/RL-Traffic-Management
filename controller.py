@@ -1,4 +1,4 @@
-from environment import Graph
+from map import Graph
 
 
 class Controller:

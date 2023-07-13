@@ -5,7 +5,7 @@ from typing import List, Tuple
 import numpy as np
 from edge import Edge
 
-from environment import Graph
+from map import Graph
 
 class Car:
     def __init__(self, car_id: int, map_: Graph, origin: int, destination: int, road_progress: int = 0, time: int = 0):
