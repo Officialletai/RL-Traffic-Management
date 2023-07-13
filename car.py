@@ -17,7 +17,7 @@ class Car:
             map_ ('Graph'): The Graph object representing the road network.
             origin (int): The node where the car starts its journey.
             destination (int): The node where the car aims to reach.
-            road_progress (int, optional): The progress of the car along its current road. Defaults to 0.
+            road_progress (int, optional): The progress of the car along its previous road. Defaults to 0.
             time (int, optional): The time elapsed since the car started its journey. Defaults to 0.
         """
         
@@ -31,8 +31,12 @@ class Car:
         self.destination = destination
         self.path = self.path_finder()
         self.path_cost = self.get_path_weights()
-        self.current = origin  
-        self.next = self.path[1] if self.path else None
+
+        self.previous = origin  
+        self.current = self.path[1] if self.path else None
+        self.next = self.path[2] if self.path else None
+        
+
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
         self.road_progress = road_progress
         self.time = time
@@ -40,12 +44,12 @@ class Car:
 
     def get_location(self):
         """
-        Get the car's current location.
+        Get the car's previous location.
         
         Returns:
-            tuple: The current node, the destination and the car's progress along the road to the next node.
+            tuple: The previous node, the destination and the car's progress along the road to the current node.
         """
-        return self.current, self.next, self.road_progress
+        return self.previous, self.current, self.next, self.road_progress
     
 
     def move(self, light_green: bool):
@@ -53,12 +57,12 @@ class Car:
         Move the car along its path.
         
         Args:
-            light_green (bool): Whether the light at the next node is green.
+            light_green (bool): Whether the light at the current node is green.
         """
-        # Compute the car's speed based on the current road's weight (cost)
+        # Compute the car's speed based on the previous road's weight (cost)
         speed = (1 / self.path_cost[0]) * 100
 
-        # Move the car along the current road at the computed speed
+        # Move the car along the previous road at the computed speed
         self.road_progress += speed
 
         # Ensure road progress does not exceed 100
@@ -69,16 +73,18 @@ class Car:
         if self.road_progress >= 100 and light_green:
 
             self.road_progress = 0
-            self.current = self.next
+            self.previous = self.current
             self.path.pop(0)
             self.path_cost.pop(0)
 
             # If there's still path left to traverse
             if self.path:
-                # Update the next destination node and the current road
-                self.next = self.path[1] if len(self.path) > 1 else None
+                # Update the current destination node and the previous road
+                self.current = self.path[1] if len(self.path) > 1 else None
+                self.next = self.path[2] if len(self.path) > 2 else None
                 self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
             else:
+                self.current = None
                 self.next = None
                 self.road = None
 
@@ -108,10 +114,10 @@ class Car:
 
         # Iterate over each row in the adjacency matrix
         for row in self.map.adjacency:
-            # Initialize an empty list to store the values in the current row
+            # Initialize an empty list to store the values in the previous row
             new_row = []
             
-            # Iterate over each item in the current row
+            # Iterate over each item in the previous row
             for edge in row:
                 # If the item is an instance of the Edge class, add its weight to the new row
                 if isinstance(edge, Edge):
@@ -150,7 +156,7 @@ class Car:
         
         # Iterate over each pair of nodes in the shortest path
         for i in range(len(shortest_path) - 1):
-            # Get the current node and the next node in the path
+            # Get the previous node and the current node in the path
             node1, node2 = shortest_path[i], shortest_path[i + 1]
             
             # Get the Edge object connecting the two nodes
@@ -169,8 +175,8 @@ if __name__ == '__main__':
         stop = random.randrange(0, london.num_nodes - 1)
     car_0 = Car(0, london, start, stop)
     shortest_path = car_0.path_finder()
+    print(car_0.previous)
     print(car_0.current)
-    print(car_0.next)
     print(car_0.path)
     print(car_0.road)
     print(car_0.time)
