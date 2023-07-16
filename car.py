@@ -40,6 +40,8 @@ class Car:
         self.road_progress = road_progress
         self.time = time
 
+        self.on_edge = False
+
 
     def get_location(self):
         """
@@ -71,6 +73,9 @@ class Car:
         # If the car has reached the end of the road and the light is green
         if self.road_progress >= 100 and light_green:
 
+            # if we were in queue and we are in first position then we need to leave queue first
+
+
             self.road_progress = 0
             self.previous = self.current
             self.path.pop(0)
@@ -87,6 +92,7 @@ class Car:
                 self.next = None
                 self.road = None
 
+        # if traffic light is red and we are at end of road, we must join the correct queue
         elif self.road_progress >= 100 and not light_green:
             # add car to queue for relevant node
             # node = current node 

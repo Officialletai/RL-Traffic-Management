@@ -35,6 +35,10 @@ class Environment:
         self.time = 0
         self.score = 0
 
+        return self.get_state()
+
+    def get_state(self):
+        pass
 
     def step(self, actions):
 
@@ -53,14 +57,12 @@ class Environment:
 
                 # car.move(traffic light color)
                 car.move(traffic_light_state)
-
             pass
 
         reward = None 
         finished = None
-        new_state = (self.cars, self.map.traffic_light_instances)
                      
-        return new_state, reward, finished
+        return self.get_state(), reward, finished
 
 
 
