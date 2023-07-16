@@ -50,6 +50,28 @@ class Car:
         """
         return self.previous, self.current, self.next, self.road_progress
     
+    def reward(self):
+        """
+        The reward for each individual car is equal to the (time that the car took to reach it's destination) minus
+                                                            (the time the car would've taken with no traffic)
+        """
+
+        # Initialize an empty list to store the time weights
+        total_time_weights = 0
+        
+        # Iterate over each pair of nodes in the shortest path
+        for i in range(len(shortest_path) - 1):
+            # Get the previous node and the current node in the path
+            node1, node2 = shortest_path[i], shortest_path[i + 1]
+            
+            # Get the Edge object connecting the two nodes
+            edge = self.map.adjacency[node1][node2]
+            
+            # Add the edge weight to the list
+            total_time_weights += (edge.time_weight[0])
+
+        self.reward = total_time_weights - self.time
+        return self.reward
 
     def move(self, light_green: bool):
         """
