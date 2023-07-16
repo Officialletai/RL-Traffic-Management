@@ -4,4 +4,4 @@ class Edge:
         self.speed_limit = speed_limit
         self.distance = distance
         self.additional_costs = additional_costs
-
+        self.time_weight = (distance / speed_limit)

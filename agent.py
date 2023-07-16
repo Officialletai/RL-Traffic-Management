@@ -1,9 +1,4 @@
-#Reinforcement Learning, Single, Monte Carlo Policy Agent
-
-#General Choices Made:
-#   -Terminate after xxxx seconds or when there are no more cars in any queues
-#   -Monte Carlo approach for simplicity (update values at the end of episode)
-
+#Reinforcement Learning, Single, GCN Agent
 
 #   choose action
 #   perform action
