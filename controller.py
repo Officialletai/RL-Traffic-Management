@@ -140,8 +140,11 @@ class Controller:
     def change_traffic_lights(self,node_number,phase_number):
         phase = self.get_phase(self.map.intersections[node_number])[phase_number]
         edge_label = self.map.nodes[str(node_number)].edge_labels
-    
-        # Changes traffic light state for all combinations of edges (All traffic lights) at a node
+        # if phase > len(self.get_phase(self.map.intersections[node_number])):
+        #      phase = self.get_phase(self.map.intersections[node_number])[0] # Reset the phase to 1
+        #      raise ValueError("Too high ")
+        # else: 
+            # Changes traffic light state for all combinations of edges (All traffic lights) at a node
         keys = 'ABCD'
         for i in keys[0:self.map.intersections[node_number]]:
             for j in keys[0:self.map.intersections[node_number]]:

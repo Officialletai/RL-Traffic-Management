@@ -40,7 +40,6 @@ class Graph:
 
         self.traffic_light_matrix = self.traffic_light_locations()
         self.traffic_light_instances = self.generate_traffic_light_instances()
-        # self.num_intersections,self.phase_array = self.intersection_edge_labeling()
         self.intersections = self.get_intersections()
         
         
@@ -169,39 +168,33 @@ class Graph:
                         traffic_light_instances[i,j,k] = Light(0)
         return traffic_light_instances
     
-    # def intersection_edge_labeling(self):
-    #     num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
-        
-    #     binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
-    #     array_of_dictionaries = []
-    #     for row in binary_adjacency:
-    #         row_dict = {}
-    #         keys = 'abcd'
-    #         key_num = 0
-    #         for i, value in enumerate(row):
-    #             if value == 1:
-    #                 row_dict[keys[key_num]] = i
-    #                 key_num += 1
-    #         array_of_dictionaries.append(row_dict)
-    #     return num_intersections, array_of_dictionaries
+    # Creating a matrix of instances of all traffic lights
+    # 2D matrix consisting of dictionaries, many less elements compared to previous 3D matrix implementation
+    # Can loop through elements using this methodology:
+    """
+    for i in range(a.shape[0]):         # Current node
+            for j in range(a.shape[1]): # Previous node
+                    for k in a[i][j]:   # Next node
+    """
+    def generate_traffic_light_instances_dictionary_version(self):
+        traffic_light_instances = np.empty_like(self.adjacency, dtype=object)
 
+        for i in range(self.traffic_light_matrix.shape[0]):     # Current node
+            for j in range(self.traffic_light_matrix.shape[1]): # Previous node
+                # if all(element == 0 for element in self.traffic_light_matrix[i,j]): # Adds a 0 element instaed of an empty dictionary in matrix[i,j]
+                #     traffic_light_instances[i,j] = 0
+                # else:
+                    traffic_light_instances[i,j] = {}       # Initialising a dictionary
+                    for k in range(self.traffic_light_matrix.shape[2]): 
+                        if self.traffic_light_matrix[i,j,k] != 0:
+                            traffic_light_instances[i,j][k] = Light(0) # Key is the number of the next node
+        return traffic_light_instances  
+    
     def get_intersections(self):
         num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
         return num_intersections        
     
-    # def change_traffic_lights(self,node_number,phase_number):
-    #     cont = Controller() # Initialises controller
-    #     phase = cont.get_phase(self.intersections[node_number])[phase_number]
-    #     edge_label = self.nodes[str(node_number)].edge_labels
-        
-    #     # Changes traffic light state for all combinations of edges (All traffic lights) at a node
-    #     keys = 'ABCD'
-    #     for i in keys[0:self.intersections[node_number]]:
-    #         for j in keys[0:self.intersections[node_number]]:
-    #             if i != j:
-    #                 self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
-    #                 print(self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
-    
+
 if __name__ == '__main__':
     # Test the graph
     graph = Graph(10) # Creates instance of graph with 10 different nodes
