@@ -1,4 +1,6 @@
 import numpy as np
+import json
+import random
 from edge import Edge
 
 class Node:
@@ -11,6 +13,17 @@ class Node:
         self.pointers = self.get_pointers()
 
         self.edge_labels = self.get_edge_labels()
+
+        # Read and store phases appropriate for a node of self.degree
+        filename = f'phases/node_degree_{self.degree}_phases.json'
+        with open(filename, "r") as file:
+            self.phases = json.load(file)
+
+        # Store the phase numbers (i.e. 1,2,3....)
+        self.phase_numbers = [i+1 for i in range(len(self.phases))]
+
+        # Pick a random phase to initialise the node
+        self.phase = random.choice(self.phase_numbers)
 
     def get_edge_labels(self):
         """
@@ -79,6 +92,41 @@ class Node:
                     self.pointers[edge][pointer] = edge_destinations.index(pointer)
                 except:
                     self.pointers[edge][pointer] = None
+
+    def remove_car(self):
+        """
+        Uses the current phase of the node to decifer which traffic lights are green or red to remove cars from queues
+        at particular edges and set them off to their journey onto the next edge/road (if the light for the journey from
+        the current edge to the next edge via the node is green).
+
+        One call to this function removes the first car from each edge wanting to go to any other edge as permitted by the
+        lights at that time (i.e. removes a car for every legal journey given the phase/lights)
+        """
+        for edge in self.phases[f'phase_{self.phase}']:
+            for next_edge in self.phases[f'phase_{self.phase}'][edge]:
+                 
+                if self.phases[f'phase_{self.phase}'][edge][next_edge] == 1:
+                    car_object = self.queues[edge].pop(self.pointer[edge][next_edge])
+                    car_object.on_edge = True
+
+                    car_object.road_progress = 0
+                    car_object.previous = self.current
+                    car_object.path.pop(0)
+                    car_object.path_cost.pop(0)
+
+                    
+                    # Need to discuss with Tai to verify this section
+
+                    # if car_object.path:
+                    #     car_object.current = car_object.path[1] if len(car_object.path) > 1 else None
+                    #     car_object.next = car_object.path[2] if len(car_object.path) > 2 else None
+                    #     car_object.road = car_object.map.adjacency[car_object.path[0], car_object.path[1]] if car_object.path else None
+                    # else:
+                    #     car_object.current = None
+                    #     car_object.next = None
+                    #     car_object.road = None
+        
+        self.update_pointers()
 
 # it has degree queues
 # it has degree x (degree-1) traffic lights for fully defined case
