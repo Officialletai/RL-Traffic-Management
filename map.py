@@ -42,6 +42,8 @@ class Graph:
         self.traffic_light_instances = self.generate_traffic_light_instances()
         # self.num_intersections,self.phase_array = self.intersection_edge_labeling()
         self.intersections = self.get_intersections()
+
+        self.weight_matrix = self.get_weight_matrix()
         
         
     def generate(self):
@@ -202,6 +204,34 @@ class Graph:
     #                 self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
     #                 print(self.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
     
+
+    def get_weight_matrix(self):
+        adjacency_weights = []
+
+        # Iterate over each row in the adjacency matrix
+        for row in self.adjacency:
+            # Initialize an empty list to store the values in the previous row
+            new_row = []
+            
+            # Iterate over each item in the previous row
+            for edge in row:
+                # If the item is an instance of the Edge class, add its weight to the new row
+                if isinstance(edge, Edge):
+                    new_row.append(float(edge.weight))
+                # If the item is not an instance of the Edge class (i.e., it's zero), add zero to the new row
+                else:
+                    new_row.append(0)
+            
+            # Add the new row to the new matrix
+            adjacency_weights.append(new_row)
+
+        #print(np.matrix(adjacency_weights))
+        # Convert the list of lists to a numpy array
+        adjacency_weights = np.array(adjacency_weights)
+
+        return adjacency_weights
+
+
 if __name__ == '__main__':
     # Test the graph
     graph = Graph(10) # Creates instance of graph with 10 different nodes
@@ -212,3 +242,6 @@ if __name__ == '__main__':
     graph.draw()
     traffic_lights = graph.traffic_light_locations()
     instance = graph.traffic_light_instances
+    
+    print(graph.traffic_light_matrix)
+    print(graph.weight_matrix)

@@ -29,6 +29,9 @@ class Car:
         self.map = map_
         self.origin = origin
         self.destination = destination
+        
+        self.adjacency_weights = []
+
         self.path = self.path_finder()
         self.path_cost = self.get_path_weights()
 
@@ -116,34 +119,7 @@ class Car:
         Returns:
             List[Edge objects]: The shortest path as a list of nodes.
         """
-
-        # Create a copy of the adjacency matrix with Edge objects replaced by their weights
-        # these weights should summarise the cost of the car going through the road
-        # the algorithm will attempt to minimise the cost.
-        
-        # Initialize an empty list to store the rows of the new matrix
-        adjacency_weights = []
-
-        # Iterate over each row in the adjacency matrix
-        for row in self.map.adjacency:
-            # Initialize an empty list to store the values in the previous row
-            new_row = []
-            
-            # Iterate over each item in the previous row
-            for edge in row:
-                # If the item is an instance of the Edge class, add its weight to the new row
-                if isinstance(edge, Edge):
-                    new_row.append(float(edge.weight))
-                # If the item is not an instance of the Edge class (i.e., it's zero), add zero to the new row
-                else:
-                    new_row.append(0)
-            
-            # Add the new row to the new matrix
-            adjacency_weights.append(new_row)
-
-        #print(np.matrix(adjacency_weights))
-        # Convert the list of lists to a numpy array
-        adjacency_weights = np.array(adjacency_weights)
+        adjacency_weights = self.map.weight_matrix
 
 
         # Convert the modified adjacency matrix to a NetworkX graph

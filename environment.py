@@ -38,7 +38,11 @@ class Environment:
         return self.get_state()
 
     def get_state(self):
-        pass
+        weight_matrix = self.map.weight_matrix
+        max_weight = weight_matrix.max()
+        normalised_weight_matrix = weight_matrix / max_weight
+        
+
 
     def step(self, actions):
 
@@ -71,3 +75,4 @@ class Environment:
 if __name__ =='__main__':
     test = Environment()
     print(test.cars)
+    test.get_state()
