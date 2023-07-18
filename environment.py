@@ -38,10 +38,24 @@ class Environment:
         return self.get_state()
 
     def get_state(self):
+        state = []
+
+        # adjacency matrix weights
         weight_matrix = self.map.weight_matrix
         max_weight = weight_matrix.max()
         normalised_weight_matrix = weight_matrix / max_weight
         
+        state.append(normalised_weight_matrix)
+        
+        # traffic light matrix
+        raw_traffic_light_matrix = self.map.traffic_light_matrix
+
+
+        # car on nodes and edges matrix
+        
+
+        return state
+
 
 
     def step(self, actions):
