@@ -43,6 +43,17 @@ class Controller:
             # "A": {"B" : 1},
             # "B": {"A" : 1},
        
+    def get_move_set(self):
+        move_set = [i for i in range(self.map.num_nodes)]
+        for node_number in move_set:
+            if self.map.intersections[node_number] == 1:
+                move_set.remove(node_number)
+
+        # move to end turn, because technically AI can keep picking moves infintely
+        # alternatively this can be used if AI picks moves == num_nodes and phase == 0 == do nothing
+        #move_set.append(-1)
+        return move_set
+    
 
     def get_phase(self, num_intersections):
         if num_intersections == 4:
@@ -59,9 +70,8 @@ class Controller:
         # Use phase_number to generate the key for the phase
         phase_key = "phase_" + str(phase_number)
         
-        # if number of intersection == 1, change light and return:
-        if self.map.intersections[node_number] == 1:
-            print(self.map.traffic_light_instances[node_number])
+        # if number of intersection == 1 or phase_number == 0, skip:
+        if self.map.intersections[node_number] == 1 or phase_number == 0:
             return
 
         # Get the appropriate phase dictionary
@@ -91,4 +101,6 @@ if __name__ == "__main__":
     controller_test = Controller(Graph())
     # print(controller_test.node_move_set)
     print(controller_test.four_way_move_set)
+    print(controller_test.get_move_set())
     controller_test.change_traffic_lights(1, 1)
+    

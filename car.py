@@ -37,7 +37,7 @@ class Car:
 
         self.previous = origin  
         self.current = self.path[1] if self.path else None
-        self.next = self.path[2] if self.path else None
+        self.next = self.path[2] if len(self.path) > 2 else None
         
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
         self.road_progress = road_progress

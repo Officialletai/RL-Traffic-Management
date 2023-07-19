@@ -15,15 +15,18 @@ class Node:
         self.edge_labels = self.get_edge_labels()
 
         # Read and store phases appropriate for a node of self.degree
-        filename = f'phases/node_degree_{self.degree}_phases.json'
-        with open(filename, "r") as file:
-            self.phases = json.load(file)
+        if self.degree > 1:
+            filename = f'phases/node_degree_{self.degree}_phases.json'
+            with open(filename, "r") as file:
+                self.phases = json.load(file)
 
-        # Store the phase numbers (i.e. 1,2,3....)
-        self.phase_numbers = [i+1 for i in range(len(self.phases))]
+            # Store the phase numbers (i.e. 1,2,3....)
+            self.phase_numbers = [i+1 for i in range(len(self.phases))]
 
-        # Pick a random phase to initialise the node
-        self.phase = random.choice(self.phase_numbers)
+            # Pick a random phase to initialise the node
+            self.phase = random.choice(self.phase_numbers)
+        else:
+            self.phase = 0
 
     def get_edge_labels(self):
         """
@@ -116,15 +119,14 @@ class Node:
 
                     
                     # Need to discuss with Tai to verify this section
-
-                    # if car_object.path:
-                    #     car_object.current = car_object.path[1] if len(car_object.path) > 1 else None
-                    #     car_object.next = car_object.path[2] if len(car_object.path) > 2 else None
-                    #     car_object.road = car_object.map.adjacency[car_object.path[0], car_object.path[1]] if car_object.path else None
-                    # else:
-                    #     car_object.current = None
-                    #     car_object.next = None
-                    #     car_object.road = None
+                    if car_object.path:
+                        car_object.current = car_object.path[1] if len(car_object.path) > 1 else None
+                        car_object.next = car_object.path[2] if len(car_object.path) > 2 else None
+                        car_object.road = car_object.map.adjacency[car_object.path[0], car_object.path[1]] if car_object.path else None
+                    else:
+                        car_object.current = None
+                        car_object.next = None
+                        car_object.road = None
         
         self.update_pointers()
 
