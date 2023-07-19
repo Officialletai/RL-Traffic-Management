@@ -110,23 +110,7 @@ class Node:
                  
                 if self.phases[f'phase_{self.phase}'][edge][next_edge] == 1:
                     car_object = self.queues[edge].pop(self.pointer[edge][next_edge])
-                    car_object.on_edge = True
-
-                    car_object.road_progress = 0
-                    car_object.previous = self.current
-                    car_object.path.pop(0)
-                    car_object.path_cost.pop(0)
-
-                    
-                    # Need to discuss with Tai to verify this section
-                    if car_object.path:
-                        car_object.current = car_object.path[1] if len(car_object.path) > 1 else None
-                        car_object.next = car_object.path[2] if len(car_object.path) > 2 else None
-                        car_object.road = car_object.map.adjacency[car_object.path[0], car_object.path[1]] if car_object.path else None
-                    else:
-                        car_object.current = None
-                        car_object.next = None
-                        car_object.road = None
+                    car_object.update_navigation()
         
         self.update_pointers()
 

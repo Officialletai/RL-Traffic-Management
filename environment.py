@@ -50,7 +50,6 @@ class Environment:
         # traffic light matrix
         raw_traffic_light_matrix = self.map.traffic_light_matrix
 
-
         # car on nodes and edges matrix
         
 
@@ -63,19 +62,30 @@ class Environment:
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
         
-        for car in self.cars:
+        for car in self.cars[:]:
             # if car can move (not arrived at destination)
             if car.current:
                 current_node = car.current
                 previous_node = car.previous
                 next_node = car.next
-                # get traffic light of next node [row][column]
-                traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
-                traffic_light_state = traffic_light.state
 
-                # car.move(traffic light color)
-                car.move(traffic_light_state)
-            pass
+
+                # if the car is at the end of its destination and the node is a dead end
+                # move as though there was a green light (no traffic light exists there)
+                if not next_node and self.map.intersections[current_node] == 1:
+                    car.move(light_green=True)
+                    reward = car.calculate_reward()
+                    self.score += reward
+                    self.cars.remove(car)
+
+                else:
+                    # get traffic light of next node [row][column]
+                    traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
+                    traffic_light_state = traffic_light.state
+
+                    # car.move(traffic light color)
+                    car.move(traffic_light_state)
+
 
         reward = None 
         finished = None

@@ -250,3 +250,4 @@ if __name__ == '__main__':
     
     print(graph.traffic_light_matrix)
     print(graph.weight_matrix)
+    print(graph.intersections)

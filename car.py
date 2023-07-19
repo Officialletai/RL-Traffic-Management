@@ -42,8 +42,9 @@ class Car:
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
         self.road_progress = road_progress
         self.time = time
+        self.reward = 0
 
-        self.on_edge = False
+        self.on_edge = True
 
 
     def get_location(self):
@@ -55,10 +56,10 @@ class Car:
         """
         return self.previous, self.current, self.next, self.road_progress
     
-    def reward(self):
+    def calculate_reward(self):
         """
         The reward for each individual car is equal to the (time that the car took to reach it's destination) minus
-                                                            (the time the car would've taken with no traffic)
+        (the time the car would've taken with no traffic)
         """
 
         # Initialize an empty list to store the time weights
@@ -76,7 +77,40 @@ class Car:
             total_time_weights += (edge.time_weight[0])
 
         self.reward = total_time_weights - self.time
-        return self.reward
+    
+
+    def get_queue(self):
+            # if only 1 intersection -> no traffic light -> no queue
+            if not self.current or self.map.intersections[self.current] == 1:
+                return None
+            
+            # node = previous node / from 
+            node = self.map.nodes[f'{self.previous}']
+            # get edge label of current node 
+            mapping = node.edge_labels
+            # get translation of next node -> a/b/c/d
+            translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
+            return node.queues[translation]
+    
+
+    def update_navigation(self):
+        self.on_edge = True
+
+        self.road_progress = 0
+        self.previous = self.current
+        self.path.pop(0)
+        self.path_cost.pop(0)
+
+        
+        if self.path:
+            self.current = self.path[1] if len(self.path) > 1 else None
+            self.next = self.path[2] if len(self.path) > 2 else None
+            self.road = self.map.adjacency[self.path[0], self.path[1]] if len(self.path) > 1 else None
+        else:
+            self.current = None
+            self.next = None
+            self.road = None
+
 
     def move(self, light_green: bool):
         """
@@ -85,6 +119,13 @@ class Car:
         Args:
             light_green (bool): Whether the light at the current node is green.
         """
+
+        # If a car is not on the road, it is in queue so it cannot move forward but time still passes
+        # if a car is at the front of the queue, the node class will pop the car out of the queue
+        if self.on_edge == False:
+            self.time += 1
+            return 
+        
         # Compute the car's speed based on the previous road's weight (cost)
         speed = (1 / self.path_cost[0]) * 100
 
@@ -98,36 +139,29 @@ class Car:
         # If the car has reached the end of the road and the light is green
         if self.road_progress >= 100 and light_green:
 
-            # if we were in queue and we are in first position then we need to leave queue first
+            # if there exists a queue, join queue, otherwise pass through
+            # queue = queue if exists, otherwise returns None 
+            queue = self.get_queue()
 
+            # if queue exists and not empty, join queue, and now off road
+            if queue:
+                queue.append(self)
+                
+                # if car join queue, car no longer on edge
+                self.on_edge = False
 
-            self.road_progress = 0
-            self.previous = self.current
-            self.path.pop(0)
-            self.path_cost.pop(0)
-
-            # If there's still path left to traverse
-            if self.path:
-                # Update the current destination node and the previous road
-                self.current = self.path[1] if len(self.path) > 1 else None
-                self.next = self.path[2] if len(self.path) > 2 else None
-                self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
+            # if queue is empty or does not exist we go to the next road
             else:
-                self.current = None
-                self.next = None
-                self.road = None
+                self.update_navigation()
+
 
         # if traffic light is red and we are at end of road, we must join the correct queue
         elif self.road_progress >= 100 and not light_green:
-            # add car to queue for relevant node
-            # node = current node 
-            node = self.map.nodes[f'{self.current}']
-            # get edge label of current node 
-            mapping = node.edge_labels
-            # get translation of next node -> a/b/c/d
-            translation = list(mapping.keys())[list(mapping.values()).index(self.next)]
-            # add car id to respective queue
-            node.queues[translation].append(self.car_id)
+            queue = self.get_queue()
+            queue.append(self)
+
+            # if car join queue, car no longer on edge
+            self.on_edge = False
 
         # no matter what, we increment time by one unit
         self.time += 1
@@ -153,6 +187,7 @@ class Car:
         
         return shortest_path
     
+
     def get_path_weights(self) -> List[Tuple[Edge, float]]:
         """
         Given the shortest path as a list of nodes, return a list of tuples. Each tuple contains an edge (i.e., 
@@ -180,31 +215,30 @@ class Car:
 if __name__ == '__main__':
     london = Graph(10) 
     start = random.randrange(0, london.num_nodes - 1)
-    stop = random.randrange(0, london.num_nodes - 1)
+    stop = random.randrange(5, london.num_nodes - 1)
     while stop == start:
         stop = random.randrange(0, london.num_nodes - 1)
     car_0 = Car(0, london, start, stop)
     shortest_path = car_0.path_finder()
-    print(car_0.previous)
-    print(car_0.current)
-    print(car_0.next)
     print(car_0.path)
 
     mapping = car_0.map.nodes[f'{car_0.current}'].edge_labels
-    print(mapping)
-    translation = list(mapping.keys())[list(mapping.values()).index(car_0.next)]
-    print(translation)
-    print(car_0.map.nodes[f'{car_0.current}'].queues[translation])
+    print('mapping',mapping)
 
+    print('queue', car_0.get_queue())
     car_0.move(True)
     print(car_0.road_progress)
     print(car_0.previous)
     print(car_0.current)
     print(car_0.next)
     print(car_0.path)
+
+    print(car_0.get_queue())
     car_0.move(True)
     print(car_0.road_progress)
     print(car_0.previous)
     print(car_0.current)
     print(car_0.next)
     print(car_0.path)
+
+    print(car_0.get_queue())
