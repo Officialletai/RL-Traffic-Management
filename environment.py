@@ -38,22 +38,31 @@ class Environment:
         return self.get_state()
 
     def get_state(self):
-        state = []
-
         # adjacency matrix weights
         weight_matrix = self.map.weight_matrix
         max_weight = weight_matrix.max()
         normalised_weight_matrix = weight_matrix / max_weight
         
-        state.append(normalised_weight_matrix)
-        
         # traffic light matrix
         raw_traffic_light_matrix = self.map.traffic_light_matrix
 
         # car on nodes and edges matrix
+        queue_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
+        edge_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
+        for car in self.cars():
+            # if a car is at its destination, no longer include it in the state
+            if car.finished == True:
+                continue
+            
+            # if the car is on the edge, we can add it to the edge matrix
+            # otherwise add it to the queue matrix
+            if car.on_edge == True:
+                edge_matrix[car.previous][car.next] += 1
+            else:
+                queue_matrix[car.current][car.next] += 1
         
 
-        return state
+        return normalised_weight_matrix, queue_matrix, edge_matrix
 
 
 
