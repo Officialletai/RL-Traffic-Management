@@ -38,24 +38,39 @@ class Environment:
         return self.get_state()
 
     def get_state(self):
-        state = []
-
         # adjacency matrix weights
         weight_matrix = self.map.weight_matrix
         max_weight = weight_matrix.max()
         normalised_weight_matrix = weight_matrix / max_weight
-        
-        state.append(normalised_weight_matrix)
-        
-        # NEED TO DO THIS FOR NEW IMPLEMENTATION OF TRAFFIC LIGHTS IN DICTIONARIES IN NODES
-        # traffic light matrix
-        # raw_traffic_light_matrix = self.map.traffic_light_matrix
 
-        # NEED TO IMPLEMENT THIS
         # car on nodes and edges matrix
+        queue_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
+        edge_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
+        for car in self.cars():
+            # if a car is at its destination, no longer include it in the state
+            if car.finished == True:
+                continue
+            
+            # if the car is on the edge, we can add it to the edge matrix
+            # otherwise add it to the queue matrix
+            if car.on_edge == True:
+                edge_matrix[car.previous][car.next] += 1
+            else:
+                queue_matrix[car.current][car.next] += 1
         
-
-        return state
+        # traffic light matrix
+        max_degree = max([self.map.nodes[str(node)].degree for node in self.map.nodes])
+        traffic_light_matrix = np.zeros(self.num_nodes, max_degree*(max_degree-1))
+        
+        for node in range(self.map.num_nodes):
+            nodal_traffic_lights = self.map.nodes[str(node)].traffic_lights
+            node_legal_journeys_counter = 0
+            for current_edge in nodal_traffic_lights:
+                for next_edge in nodal_traffic_lights[current_edge]:
+                    traffic_light_matrix[node, node_legal_journeys_counter] = nodal_traffic_lights[current_edge][next_edge].state
+                    node_legal_journeys_counter += 1
+        
+        return normalised_weight_matrix, queue_matrix, edge_matrix, traffic_light_matrix
 
 
 
