@@ -34,8 +34,10 @@ class Car:
 
         self.path = self.path_finder()
         self.path_cost = self.get_path_weights()
+        
+        self.initial_edge_choice = self.initialise_on_queue() # Choose a random edge for car to line up in start node
 
-        self.previous = None # origin  
+        self.previous = self.initial_edge_choice # origin  
         self.current = self.path[0] if self.path else None
         self.next = self.path[1] # if len(self.path) > 2 else None
         
@@ -44,8 +46,6 @@ class Car:
         self.road_progress = road_progress
         self.time = time
         self.reward = 0
-
-        self.initialise_on_queue() # Choose a random edge for car to line up in start node
 
         self.on_edge = False # True
         self.finished = bool(self.current == self.destination)
@@ -83,10 +83,16 @@ class Car:
     
     def initialise_on_queue(self):
         """Looks at the origin node edges and picks one randomly to queue up there at the start of its journey"""
-        possible_edges = list(self.map.nodes[f'{self.origin}'].queues.keys())
+        init_node = self.map.nodes[f'{self.origin}']
+        possible_edges = list(init_node.queues.keys())
         edge_choice = random.choice(possible_edges)
         # Add car instance to a particular edge at origin node
-        self.map.nodes[f'{self.origin}'].queues[str(edge_choice)].append(self)
+        init_node.queues[str(edge_choice)].append(self)
+
+        for edge_node_number in init_node.edge_labels:
+            if init_node.edge_labels[edge_node_number] == edge_choice:
+                return edge_node_number
+        print('Check initialise_on_queue() method')
 
     def get_queue(self):
             # if only 1 intersection -> no traffic light -> no queue
@@ -94,9 +100,9 @@ class Car:
                 return None
             
             #####
-            current_node = self.map.nodes[self.current]
-            current_edge_label = current_node.edge_labels[self.previous]
-            queue = current_node.queues[current_edge_label]
+            current_node = self.map.nodes[str(self.current)]
+            current_edge_label = current_node.edge_labels[str(self.previous)]
+            queue = current_node.queues[str(current_edge_label)]
 
             return queue
             #####

@@ -43,7 +43,7 @@ class Node:
         for i, value in enumerate(self.connections):
             if isinstance(value, Edge): 
                 # edge_labels[keys[key_num]] = i
-                edge_labels[i] = keys[key_num]
+                edge_labels[str(i)] = keys[key_num]
                 key_num += 1
         
         return edge_labels
