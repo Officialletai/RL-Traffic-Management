@@ -5,16 +5,16 @@ from typing import List, Tuple
 import numpy as np
 from edge import Edge
 
-from map import Graph
+from map import Map
 
 class Car:
-    def __init__(self, car_id: int, map_: Graph, origin: int, destination: int, road_progress: int = 0, time: int = 0):
+    def __init__(self, car_id: int, map_: Map, origin: int, destination: int, road_progress: int = 0, time: int = 0):
         """
         Initialises the Car object.
 
         Args:
             car_id (int): The car's unique identifier.
-            map_ ('Graph'): The Graph object representing the road network.
+            map_ ('Map'): The Map object representing the road network.
             origin (int): The node where the car starts its journey.
             destination (int): The node where the car aims to reach.
             road_progress (int, optional): The progress of the car along its previous road. Defaults to 0.
@@ -30,22 +30,25 @@ class Car:
         self.origin = origin
         self.destination = destination
         
-        self.adjacency_weights = []
+        # self.adjacency_weights = []
 
         self.path = self.path_finder()
         self.path_cost = self.get_path_weights()
 
-        self.previous = origin  
-        self.current = self.path[1] if self.path else None
-        self.next = self.path[2] if len(self.path) > 2 else None
+        self.previous = None # origin  
+        self.current = self.path[0] if self.path else None
+        self.next = self.path[1] # if len(self.path) > 2 else None
         
+        # road is Edge object
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
         self.road_progress = road_progress
         self.time = time
         self.reward = 0
 
-        self.on_edge = True
+        self.initialise_on_queue() # Choose a random edge for car to line up in start node
 
+        self.on_edge = False # True
+        self.finished = bool(self.current == self.destination)
 
     def get_location(self):
         """
@@ -66,9 +69,9 @@ class Car:
         total_time_weights = 0
         
         # Iterate over each pair of nodes in the shortest path
-        for i in range(len(shortest_path) - 1):
+        for i in range(len(self.path) - 1):
             # Get the previous node and the current node in the path
-            node1, node2 = shortest_path[i], shortest_path[i + 1]
+            node1, node2 = self.path[i], self.path[i + 1]
             
             # Get the Edge object connecting the two nodes
             edge = self.map.adjacency[node1][node2]
@@ -78,19 +81,33 @@ class Car:
 
         self.reward = total_time_weights - self.time
     
+    def initialise_on_queue(self):
+        """Looks at the origin node edges and picks one randomly to queue up there at the start of its journey"""
+        possible_edges = list(self.map.nodes[f'{self.origin}'].queues.keys())
+        edge_choice = random.choice(possible_edges)
+        # Add car instance to a particular edge at origin node
+        self.map.nodes[f'{self.origin}'].queues[str(edge_choice)].append(self)
 
     def get_queue(self):
             # if only 1 intersection -> no traffic light -> no queue
             if not self.current or self.map.intersections[self.current] == 1:
                 return None
             
-            # node = previous node / from 
-            node = self.map.nodes[f'{self.previous}']
-            # get edge label of current node 
-            mapping = node.edge_labels
-            # get translation of next node -> a/b/c/d
-            translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
-            return node.queues[translation]
+            #####
+            current_node = self.map.nodes[self.current]
+            current_edge_label = current_node.edge_labels[self.previous]
+            queue = current_node.queues[current_edge_label]
+
+            return queue
+            #####
+
+            # # node = previous node / from 
+            # node = self.map.nodes[f'{self.previous}']
+            # # get edge label of current node 
+            # mapping = node.edge_labels
+            # # get translation of next node -> a/b/c/d
+            # translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
+            # return node.queues[translation]
     
 
     def update_navigation(self):
@@ -101,15 +118,27 @@ class Car:
         self.path.pop(0)
         self.path_cost.pop(0)
 
-        
+        #######
         if self.path:
-            self.current = self.path[1] if len(self.path) > 1 else None
-            self.next = self.path[2] if len(self.path) > 2 else None
-            self.road = self.map.adjacency[self.path[0], self.path[1]] if len(self.path) > 1 else None
-        else:
             self.current = None
+            self.next = self.path[0]
+            self.road = self.map.adjacency[self.previous, self.next]
+        else:
+            self.current = self.current
             self.next = None
             self.road = None
+            self.on_edge = False
+            self.finished = True
+        #######
+
+        # if self.path:
+        #     self.current = self.path[1] if len(self.path) > 1 else None
+        #     self.next = self.path[2] if len(self.path) > 2 else None
+        #     self.road = self.map.adjacency[self.path[0], self.path[1]] if len(self.path) > 1 else None
+        # else:
+        #     self.current = None
+        #     self.next = None
+        #     self.road = None
 
 
     def move(self, light_green: bool):
@@ -130,7 +159,8 @@ class Car:
         speed = (1 / self.path_cost[0]) * 100
 
         # Move the car along the previous road at the computed speed
-        self.road_progress += speed
+        if self.road_progress < 100:
+            self.road_progress += speed
 
         # Ensure road progress does not exceed 100
         if self.road_progress > 100:  
@@ -144,7 +174,7 @@ class Car:
             queue = self.get_queue()
 
             # if queue exists and not empty, join queue, and now off road
-            if queue:
+            if queue and len(queue) > 0:
                 queue.append(self)
                 
                 # if car join queue, car no longer on edge
@@ -213,7 +243,7 @@ class Car:
         return path_weights
 
 if __name__ == '__main__':
-    london = Graph(10) 
+    london = Map(10) 
     start = random.randrange(0, london.num_nodes - 1)
     stop = random.randrange(5, london.num_nodes - 1)
     while stop == start:

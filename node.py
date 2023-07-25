@@ -42,7 +42,8 @@ class Node:
         key_num = 0
         for i, value in enumerate(self.connections):
             if isinstance(value, Edge): 
-                edge_labels[keys[key_num]] = i
+                # edge_labels[keys[key_num]] = i
+                edge_labels[i] = keys[key_num]
                 key_num += 1
         
         return edge_labels
@@ -120,9 +121,6 @@ class Node:
                     self.pointers[edge][pointer] = edge_destinations.index(pointer)
                 except:
                     self.pointers[edge][pointer] = None
-
-    def add_car_to_queue(self, car):
-        self.queues[str(car.current_node)].append(car)
     
     def remove_car(self):
         """

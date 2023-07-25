@@ -1,5 +1,5 @@
 from controller import Controller
-from map import Graph
+from map import Map
 from car import Car
 
 import numpy as np
@@ -8,7 +8,7 @@ import random
 
 class Environment:
     def __init__(self):
-        self.map = Graph()
+        self.map = Map()
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
 
@@ -19,8 +19,8 @@ class Environment:
     def initialise_cars(self, num_cars):
         cars_list = []
         for index in range(num_cars):
-            start = random.randrange(0, self.map.num_nodes - 1)
-            stop = random.randrange(0, self.map.num_nodes - 1)
+            start = random.randrange(0, self.map.num_nodes)
+            stop = random.randrange(0, self.map.num_nodes)
             car = Car(index, self.map, start, stop)
             cars_list.append(car)
 
@@ -28,7 +28,7 @@ class Environment:
 
 
     def reset(self):
-        self.map = Graph()
+        self.map = Map()
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
 
@@ -47,9 +47,11 @@ class Environment:
         
         state.append(normalised_weight_matrix)
         
+        # NEED TO DO THIS FOR NEW IMPLEMENTATION OF TRAFFIC LIGHTS IN DICTIONARIES IN NODES
         # traffic light matrix
-        raw_traffic_light_matrix = self.map.traffic_light_matrix
+        # raw_traffic_light_matrix = self.map.traffic_light_matrix
 
+        # NEED TO IMPLEMENT THIS
         # car on nodes and edges matrix
         
 
@@ -79,8 +81,16 @@ class Environment:
                     self.cars.remove(car)
 
                 else:
-                    # get traffic light of next node [row][column]
-                    traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
+                    # # get traffic light of next node [row][column]
+                    # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
+                    # traffic_light_state = traffic_light.state
+
+                    current_node_labels = self.map.nodes[current_node].edge_labels
+                    previous_node_label = current_node_labels[previous_node]
+                    next_node_label = current_node_labels[next_node]
+                    
+                    # Get the traffic light instance
+                    traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]
                     traffic_light_state = traffic_light.state
 
                     # car.move(traffic light color)

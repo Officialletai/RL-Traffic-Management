@@ -84,7 +84,7 @@ class Controller:
         # Get the specific phase
         phase = phases[phase_key]
         
-        edge_label = self.map.nodes[str(node_number)].edge_labels
+        # edge_label = self.map.nodes[str(node_number)].edge_labels
 
         keys = 'ABCD'
 
