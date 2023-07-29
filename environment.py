@@ -86,6 +86,9 @@ class Environment:
                 previous_node = car.previous
                 next_node = car.next
 
+                # if car is on road, move car
+                
+
 
                 # if the car is at the end of its destination and the node is a dead end
                 # move as though there was a green light (no traffic light exists there)

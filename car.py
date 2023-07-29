@@ -94,6 +94,7 @@ class Car:
                 return edge_node_number
         print('Check initialise_on_queue() method')
 
+
     def get_queue(self):
             # if only 1 intersection -> no traffic light -> no queue
             if not self.current or self.map.intersections[self.current] == 1:
@@ -115,6 +116,18 @@ class Car:
             # translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
             # return node.queues[translation]
     
+
+    def if_front_of_queue(self):
+        current_node = self.map.nodes[str(self.current)]
+        current_edge_label = current_node.edge_labels[str(self.previous)]
+        next_edge_label = current_node.edge_labels[str(self.next)]
+
+        pointers = current_node.pointers
+        current_pointer = pointers[current_edge_label][next_edge_label]
+
+        return current_pointer == self
+
+
 
     def update_navigation(self):
         self.on_edge = True
@@ -154,12 +167,20 @@ class Car:
         Args:
             light_green (bool): Whether the light at the current node is green.
         """
-
+        queue = self.get_queue()
         # If a car is not on the road, it is in queue so it cannot move forward but time still passes
         # if a car is at the front of the queue, the node class will pop the car out of the queue
         if self.on_edge == False:
-            self.time += 1
-            return 
+            if self.if_front_of_queue():
+                queue.remove(self)
+                
+                current_node = self.map.nodes[str(self.current)]
+                current_node.update_pointers()
+
+            else:
+                self.time += 1
+                return
+
         
         # Compute the car's speed based on the previous road's weight (cost)
         speed = (1 / self.path_cost[0]) * 100
@@ -177,7 +198,6 @@ class Car:
 
             # if there exists a queue, join queue, otherwise pass through
             # queue = queue if exists, otherwise returns None 
-            queue = self.get_queue()
 
             # if queue exists and not empty, join queue, and now off road
             if queue and len(queue) > 0:
