@@ -2,12 +2,15 @@ import numpy as np
 import json
 import random
 from edge import Edge
+from light import Light
 
 class Node:
     def __init__(self, label, connections):
         self.label = label
         self.connections = connections
         self.degree = np.count_nonzero(connections)
+
+        self.traffic_lights = self.get_traffic_lights()
 
         self.queues = self.get_queues()
         self.pointers = self.get_pointers()
@@ -39,11 +42,34 @@ class Node:
         key_num = 0
         for i, value in enumerate(self.connections):
             if isinstance(value, Edge): 
-                edge_labels[keys[key_num]] = i
+                # edge_labels[keys[key_num]] = i
+                edge_labels[str(i)] = keys[key_num]
                 key_num += 1
         
         return edge_labels
     
+    def get_traffic_lights(self):
+        """Initialises all instances of traffic lights required for the node (degree x (degree-1) lights).
+        Stored in a nested dictionary with the following format: 
+        {'current_edge_1': {'next_edge_1': Light instance, 'next_edge_2': Light instance}, 'current_edge_2': ...}"""
+        keys = 'ABCD'[:self.degree]
+        traffic_lights = {}
+        for key in keys:
+            traffic_lights[key] = {keys[j]: Light(0) for j in range(self.degree) if keys[j]!=key}
+        
+        return traffic_lights
+    
+    def get_traffic_light_states(self):
+        """Returns the nested dictionary of traffic light states (0 or 1 for red or green) rather than the 
+        traffic light instances themselves."""
+        traffic_light_states = {}
+        for edge in self.traffic_lights:
+            traffic_light_states[str(edge)] = {}
+            for next_edge in self.traffic_lights[str(edge)]:
+                traffic_light_states[str(edge)][str(next_edge)] = self.traffic_lights[str(edge)][str(next_edge)].state
+
+        return traffic_light_states        
+
     def get_queues(self):
         """
         Initialises the necessary amount of queues for an intersection and stores them in a dictionary in the
@@ -95,7 +121,7 @@ class Node:
                     self.pointers[edge][pointer] = edge_destinations.index(pointer)
                 except:
                     self.pointers[edge][pointer] = None
-
+    
     def remove_car(self):
         """
         Uses the current phase of the node to decifer which traffic lights are green or red to remove cars from queues

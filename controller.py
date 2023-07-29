@@ -1,14 +1,14 @@
 import json
-from map import Graph
+from map import Map
 
 
 class Controller:
-    def __init__ (self, map_=Graph):
+    def __init__ (self, map_=Map):
     # def __init__ (self):
         # we use -1 as the stopping move to end the turn
         self.map = map_
         self.node_move_set = [i for i in range(self.map.num_nodes)]
-        self.node_move_set.append(-1)
+        # self.node_move_set.append(-1)
         # self.move_set = self.get_phase()
 
 
@@ -84,23 +84,34 @@ class Controller:
         # Get the specific phase
         phase = phases[phase_key]
         
-        edge_label = self.map.nodes[str(node_number)].edge_labels
+        # edge_label = self.map.nodes[str(node_number)].edge_labels
 
         keys = 'ABCD'
+
+        # for i in keys[0:self.map.intersections[node_number]]:
+        #     for j in keys[0:self.map.intersections[node_number]]:
+        #         if i != j:
+        #             print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
+        #             self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
+        #             print('move')
+        #             print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
+
         for i in keys[0:self.map.intersections[node_number]]:
             for j in keys[0:self.map.intersections[node_number]]:
-                if i != j:
-                    print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
-                    self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
-                    print('move')
-                    print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
+                if i!=j:
+                    print(f'Node {node_number} Current Light State:')
+                    print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
+                    print('Changing Lights...')
+                    self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state = phase[str(i)][str(j)]
+                    print('New Light State:')
+                    print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
 
-    
  
 if __name__ == "__main__":
-    controller_test = Controller(Graph())
+    controller_test = Controller(Map())
     # print(controller_test.node_move_set)
     print(controller_test.four_way_move_set)
     print(controller_test.get_move_set())
     controller_test.change_traffic_lights(1, 1)
+    controller_test.change_traffic_lights(4, 1)
     

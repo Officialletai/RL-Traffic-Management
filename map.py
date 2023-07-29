@@ -7,9 +7,9 @@ from node import Node
 from light import Light
 # from controller import Controller
 
-class Graph:
+class Map:
     """
-    Graph is a class representing an undirected, weighted graph.
+    Map is a class representing an undirected, weighted graph, which is our choice of representation for a real map.
     """
 
     def __init__(self, num_nodes=10, sparsity_dist=[0.65, 0.35]):
@@ -36,13 +36,13 @@ class Graph:
         self.num_nodes = num_nodes
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
-        self.nodes = self.generate_nodes()
+        self.weight_matrix = self.get_weight_matrix()
 
-        self.traffic_light_matrix = self.traffic_light_locations()
-        self.traffic_light_instances = self.generate_traffic_light_instances()
+        self.nodes = self.generate_nodes()
         self.intersections = self.get_intersections()
 
-        self.weight_matrix = self.get_weight_matrix()
+        # self.traffic_light_matrix = self.traffic_light_locations()
+        # self.traffic_light_instances = self.generate_traffic_light_instances()
         
         
     def generate(self):
@@ -87,20 +87,6 @@ class Graph:
                         edge_count[j] += 1
 
         return adjacency_matrix
-
-    def return_adjacency(self):
-        """
-        Return the adjacency matrix with weights (i.e., speed limits).
-        """
-        return_matrix = np.empty((self.num_nodes, self.num_nodes))
-        for i in range(len(self.adjacency)):
-            for j in range(len(self.adjacency)):
-                if isinstance(self.adjacency[i][j], Edge): 
-                    return_matrix[i][j] = self.adjacency[i][j].weight
-                else:
-                    return_matrix[i][j] = self.adjacency[i][j]
-
-        return return_matrix
     
     def generate_nodes(self):
         """
@@ -135,62 +121,62 @@ class Graph:
         
     # Creates an adjacency matrix where in the third dimension indicates the number of traffic lights located on an edge.
     # Each row indicates a node, where the edge location at the row represent the traffic lights at the node
-    def traffic_light_locations(self): 
-        num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
-        binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
+    # def traffic_light_locations(self): 
+    #     num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
+    #     binary_adjacency = (self.adjacency != 0).astype(int) # Creates a binary adjacency matrix
         
-        # Adjacency matrix of traffic lights. Elements show number of traffic lights at an edge
-        # traffic_light_adjacency_2D = np.zeros([self.num_nodes, self.num_nodes])
-        # for i, num in enumerate(num_intersections-1):
-        #     traffic_light_adjacency_2D[i, binary_adjacency[i] == 1] = num
+    #     # Adjacency matrix of traffic lights. Elements show number of traffic lights at an edge
+    #     # traffic_light_adjacency_2D = np.zeros([self.num_nodes, self.num_nodes])
+    #     # for i, num in enumerate(num_intersections-1):
+    #     #     traffic_light_adjacency_2D[i, binary_adjacency[i] == 1] = num
             
     
-        # 3D traffic lights matrix to show connectivity
-        # Current intersection (node) is the row
-        # The edge that the car is travelling from (previous node) is the column
-        # The edge that the car is travelling to is the depth
-        # Traffic lights only exist for combinations where the previous node can go to the next node
-        # There are no traffic lights at an end node (only 1 connection/intersection)
-        traffic_light_adjacency_3D = np.repeat(binary_adjacency[:, :, np.newaxis], self.num_nodes, axis=2) # Repeat along the third axis
-        traffic_light_adjacency_3D_axes_swapped = np.swapaxes(traffic_light_adjacency_3D, 1, 2) # Swap axes so that the depth is repeated along the columns
-        traffic_light_adjacency_3D = traffic_light_adjacency_3D_axes_swapped * traffic_light_adjacency_3D # Places zeros where the 2D matrix has zeros
-        for row in range(traffic_light_adjacency_3D.shape[0]):  # Emptying the diagonals
-            np.fill_diagonal(traffic_light_adjacency_3D[row], 0)
+    #     # 3D traffic lights matrix to show connectivity
+    #     # Current intersection (node) is the row
+    #     # The edge that the car is travelling from (previous node) is the column
+    #     # The edge that the car is travelling to is the depth
+    #     # Traffic lights only exist for combinations where the previous node can go to the next node
+    #     # There are no traffic lights at an end node (only 1 connection/intersection)
+    #     traffic_light_adjacency_3D = np.repeat(binary_adjacency[:, :, np.newaxis], self.num_nodes, axis=2) # Repeat along the third axis
+    #     traffic_light_adjacency_3D_axes_swapped = np.swapaxes(traffic_light_adjacency_3D, 1, 2) # Swap axes so that the depth is repeated along the columns
+    #     traffic_light_adjacency_3D = traffic_light_adjacency_3D_axes_swapped * traffic_light_adjacency_3D # Places zeros where the 2D matrix has zeros
+    #     for row in range(traffic_light_adjacency_3D.shape[0]):  # Emptying the diagonals
+    #         np.fill_diagonal(traffic_light_adjacency_3D[row], 0)
 
-        return traffic_light_adjacency_3D
+    #     return traffic_light_adjacency_3D
     
-    # Now creating a matrix of instances of all traffic lights
-    def generate_traffic_light_instances(self):
-        traffic_light_instances = np.empty_like(self.traffic_light_matrix, dtype=object)
+    # # Now creating a matrix of instances of all traffic lights
+    # def generate_traffic_light_instances(self):
+    #     traffic_light_instances = np.empty_like(self.traffic_light_matrix, dtype=object)
 
-        for i in range(self.traffic_light_matrix.shape[0]):
-            for j in range(self.traffic_light_matrix.shape[1]):
-                for k in range(self.traffic_light_matrix.shape[2]):
-                    if self.traffic_light_matrix[i,j,k] != 0:
-                        traffic_light_instances[i,j,k] = Light(0)
-        return traffic_light_instances
+    #     for i in range(self.traffic_light_matrix.shape[0]):
+    #         for j in range(self.traffic_light_matrix.shape[1]):
+    #             for k in range(self.traffic_light_matrix.shape[2]):
+    #                 if self.traffic_light_matrix[i,j,k] != 0:
+    #                     traffic_light_instances[i,j,k] = Light(0)
+    #     return traffic_light_instances
     
-    # Creating a matrix of instances of all traffic lights
-    # 2D matrix consisting of dictionaries, many less elements compared to previous 3D matrix implementation
-    # Can loop through elements using this methodology:
-    """
-    for i in range(a.shape[0]):         # Current node
-            for j in range(a.shape[1]): # Previous node
-                    for k in a[i][j]:   # Next node
-    """
-    def generate_traffic_light_instances_dictionary_version(self):
-        traffic_light_instances = np.empty_like(self.adjacency, dtype=object)
+    # # Creating a matrix of instances of all traffic lights
+    # # 2D matrix consisting of dictionaries, many less elements compared to previous 3D matrix implementation
+    # # Can loop through elements using this methodology:
+    # """
+    # for i in range(a.shape[0]):         # Current node
+    #         for j in range(a.shape[1]): # Previous node
+    #                 for k in a[i][j]:   # Next node
+    # """
+    # def generate_traffic_light_instances_dictionary_version(self):
+    #     traffic_light_instances = np.empty_like(self.adjacency, dtype=object)
 
-        for i in range(self.traffic_light_matrix.shape[0]):     # Current node
-            for j in range(self.traffic_light_matrix.shape[1]): # Previous node
-                # if all(element == 0 for element in self.traffic_light_matrix[i,j]): # Adds a 0 element instaed of an empty dictionary in matrix[i,j]
-                #     traffic_light_instances[i,j] = 0
-                # else:
-                    traffic_light_instances[i,j] = {}       # Initialising a dictionary
-                    for k in range(self.traffic_light_matrix.shape[2]): 
-                        if self.traffic_light_matrix[i,j,k] != 0:
-                            traffic_light_instances[i,j][k] = Light(0) # Key is the number of the next node
-        return traffic_light_instances  
+    #     for i in range(self.traffic_light_matrix.shape[0]):     # Current node
+    #         for j in range(self.traffic_light_matrix.shape[1]): # Previous node
+    #             # if all(element == 0 for element in self.traffic_light_matrix[i,j]): # Adds a 0 element instaed of an empty dictionary in matrix[i,j]
+    #             #     traffic_light_instances[i,j] = 0
+    #             # else:
+    #                 traffic_light_instances[i,j] = {}       # Initialising a dictionary
+    #                 for k in range(self.traffic_light_matrix.shape[2]): 
+    #                     if self.traffic_light_matrix[i,j,k] != 0:
+    #                         traffic_light_instances[i,j][k] = Light(0) # Key is the number of the next node
+    #     return traffic_light_instances  
     
     def get_intersections(self):
         num_intersections = np.sum(self.adjacency != 0, axis=1) # Finds the total intersections N at each node
@@ -239,15 +225,18 @@ class Graph:
 
 if __name__ == '__main__':
     # Test the graph
-    graph = Graph(10) # Creates instance of graph with 10 different nodes
+    graph = Map(10) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))
-    print(graph.return_adjacency())
+    # print(graph.return_adjacency())
     graph.draw()
-    traffic_lights = graph.traffic_light_locations()
-    instance = graph.traffic_light_instances
+    # traffic_lights = graph.traffic_light_locations()
+    # instance = graph.traffic_light_instances
     
-    print(graph.traffic_light_matrix)
+    # print(graph.traffic_light_matrix)
     print(graph.weight_matrix)
     print(graph.intersections)
+    
+    for node_number in graph.nodes:
+        print(graph.nodes[str(node_number)].traffic_lights)
