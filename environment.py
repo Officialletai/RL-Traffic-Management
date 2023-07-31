@@ -44,8 +44,8 @@ class Environment:
         normalised_weight_matrix = weight_matrix / max_weight
 
         # car on nodes and edges matrix
-        queue_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
-        edge_matrix = np.zeroes(self.map.num_nodes, self.map.num_nodes)
+        queue_matrix = np.zeros(self.map.num_nodes, self.map.num_nodes)
+        edge_matrix = np.zeros(self.map.num_nodes, self.map.num_nodes)
         for car in self.cars():
             # if a car is at its destination, no longer include it in the state
             if car.finished == True:
@@ -73,7 +73,6 @@ class Environment:
         return normalised_weight_matrix, queue_matrix, edge_matrix, traffic_light_matrix
 
 
-
     def step(self, actions):
 
         for node, phase in actions:
@@ -85,9 +84,6 @@ class Environment:
                 current_node = car.current
                 previous_node = car.previous
                 next_node = car.next
-
-                # if car is on road, move car
-                
 
 
                 # if the car is at the end of its destination and the node is a dead end
@@ -114,14 +110,10 @@ class Environment:
                     # car.move(traffic light color)
                     car.move(traffic_light_state)
 
-
         reward = None 
         finished = None
                      
         return self.get_state(), reward, finished
-
-
-
 
 
 if __name__ =='__main__':
