@@ -44,9 +44,10 @@ class Environment:
         normalised_weight_matrix = weight_matrix / max_weight
 
         # car on nodes and edges matrix
-        queue_matrix = np.zeros(self.map.num_nodes, self.map.num_nodes)
-        edge_matrix = np.zeros(self.map.num_nodes, self.map.num_nodes)
-        for car in self.cars():
+        queue_matrix = np.zeros((self.map.num_nodes, self.map.num_nodes))
+        edge_matrix = np.zeros((self.map.num_nodes, self.map.num_nodes))
+
+        for car in self.cars:
             # if a car is at its destination, no longer include it in the state
             if car.finished == True:
                 continue
@@ -60,7 +61,7 @@ class Environment:
         
         # traffic light matrix
         max_degree = max([self.map.nodes[str(node)].degree for node in self.map.nodes])
-        traffic_light_matrix = np.zeros(self.num_nodes, max_degree*(max_degree-1))
+        traffic_light_matrix = np.zeros((self.map.num_nodes, max_degree*(max_degree-1)))
         
         for node in range(self.map.num_nodes):
             nodal_traffic_lights = self.map.nodes[str(node)].traffic_lights
