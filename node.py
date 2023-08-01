@@ -117,7 +117,8 @@ class Node:
         for edge in self.pointers:
             edge_destinations = [car.next for car in self.queues[edge]]
             for pointer in self.pointers[edge]:
-                try:
+                print(edge_destinations.index(pointer))
+                try:  
                     self.pointers[edge][pointer] = edge_destinations.index(pointer)
                 except:
                     self.pointers[edge][pointer] = None

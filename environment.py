@@ -19,10 +19,17 @@ class Environment:
     def initialise_cars(self, num_cars):
         cars_list = []
         for index in range(num_cars):
-            start = random.randrange(0, self.map.num_nodes)
+            start = random.randrange(0, self.map.num_nodes - 1)
             stop = random.randrange(0, self.map.num_nodes)
+            if stop == start:
+                stop += 1
+            
             car = Car(index, self.map, start, stop)
+
+            car.initialise_on_queue()
+
             cars_list.append(car)
+            
 
         return cars_list
 
@@ -81,35 +88,50 @@ class Environment:
         
         for car in self.cars[:]:
             # if car can move (not arrived at destination)
-            if car.current:
-                current_node = car.current
-                previous_node = car.previous
-                next_node = car.next
+            """
+            Check all car nodes
+            current could be none if on edge
+            previous is origina / last node
+            next is next node unless you have finished
+
+            if on edge, 
+            """
+            current_node = car.current
+            previous_node = car.previous
+            next_node = car.next
 
 
-                # if the car is at the end of its destination and the node is a dead end
-                # move as though there was a green light (no traffic light exists there)
-                if not next_node and self.map.intersections[current_node] == 1:
-                    car.move(light_green=True)
+            # if the car is at the end of its destination and the node is a dead end
+            # move as though there was a green light (no traffic light exists there)
+            if not next_node and self.map.intersections[current_node] == 1:
+                car.move(light_green=True)
+
+                # if we reach the end of this road, it must be finished
+                if car.finished:
+
                     reward = car.calculate_reward()
                     self.score += reward
                     self.cars.remove(car)
+                continue 
+            
+            # if car is not edge, it must be finished or in queue
+            if car.on_edge:
+                pass
+            else:
+                # # get traffic light of next node [row][column]
+                # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
+                # traffic_light_state = traffic_light.state
 
-                else:
-                    # # get traffic light of next node [row][column]
-                    # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
-                    # traffic_light_state = traffic_light.state
+                current_node_labels = self.map.nodes[current_node].edge_labels
+                previous_node_label = current_node_labels[previous_node]
+                next_node_label = current_node_labels[next_node]
+                
+                # Get the traffic light instance
+                traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]
+                traffic_light_state = traffic_light.state
 
-                    current_node_labels = self.map.nodes[current_node].edge_labels
-                    previous_node_label = current_node_labels[previous_node]
-                    next_node_label = current_node_labels[next_node]
-                    
-                    # Get the traffic light instance
-                    traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]
-                    traffic_light_state = traffic_light.state
-
-                    # car.move(traffic light color)
-                    car.move(traffic_light_state)
+                # car.move(traffic light color)
+                car.move(traffic_light_state)
 
         reward = None 
         finished = None

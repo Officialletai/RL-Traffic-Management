@@ -8,7 +8,7 @@ from edge import Edge
 from map import Map
 
 class Car:
-    def __init__(self, car_id: int, map_: Map, origin: int, destination: int, road_progress: int = 0, time: int = 0):
+    def __init__(self, car_id: int, map_: Map, origin: int, destination: int, time: int = 0):
         """
         Initialises the Car object.
 
@@ -39,11 +39,11 @@ class Car:
 
         self.previous = self.initial_edge_choice # origin  
         self.current = self.path[0] if self.path else None
-        self.next = self.path[1] # if len(self.path) > 2 else None
+        self.next = self.path[1] if len(self.path) > 1 else None
         
         # road is Edge object
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
-        self.road_progress = road_progress
+        self.road_progress = 0
         self.time = time
         self.reward = 0
 
@@ -179,7 +179,8 @@ class Car:
 
             else:
                 self.time += 1
-                return
+            
+            return
 
         
         # Compute the car's speed based on the previous road's weight (cost)
@@ -199,13 +200,15 @@ class Car:
             # if there exists a queue, join queue, otherwise pass through
             # queue = queue if exists, otherwise returns None 
 
-            # if queue exists and not empty, join queue, and now off road
+            # if queue exists and not empty
+            # join queue, and now off road
+            print('queue', queue, len(queue))
             if queue and len(queue) > 0:
                 queue.append(self)
                 
                 # if car join queue, car no longer on edge
                 self.on_edge = False
-
+                
             # if queue is empty or does not exist we go to the next road
             else:
                 self.update_navigation()
@@ -282,19 +285,4 @@ if __name__ == '__main__':
     print('mapping',mapping)
 
     print('queue', car_0.get_queue())
-    car_0.move(True)
-    print(car_0.road_progress)
-    print(car_0.previous)
-    print(car_0.current)
-    print(car_0.next)
-    print(car_0.path)
 
-    print(car_0.get_queue())
-    car_0.move(True)
-    print(car_0.road_progress)
-    print(car_0.previous)
-    print(car_0.current)
-    print(car_0.next)
-    print(car_0.path)
-
-    print(car_0.get_queue())
