@@ -115,11 +115,11 @@ class Node:
         particular queue wanting to go to an edge. 
         """
         for edge in self.pointers:
-            edge_destinations = [car.next for car in self.queues[edge]]
+            edge_destinations = [self.edge_labels[str(car.next)] for car in self.queues[edge]]
             for pointer in self.pointers[edge]:
-                print(edge_destinations.index(pointer))
+                # print(edge_destinations.index(pointer))
                 try:  
-                    self.pointers[edge][pointer] = edge_destinations.index(pointer)
+                    self.pointers[edge][pointer] = self.queues[edge][edge_destinations.index(pointer)]
                 except:
                     self.pointers[edge][pointer] = None
     

@@ -35,11 +35,12 @@ class Car:
         self.path = self.path_finder()
         self.path_cost = self.get_path_weights()
         
+        self.current = self.path[0] if self.path else None
+        self.next = self.path[1] if len(self.path) > 1 else None
+
         self.initial_edge_choice = self.initialise_on_queue() # Choose a random edge for car to line up in start node
 
         self.previous = self.initial_edge_choice # origin  
-        self.current = self.path[0] if self.path else None
-        self.next = self.path[1] if len(self.path) > 1 else None
         
         # road is Edge object
         self.road = self.map.adjacency[self.path[0], self.path[1]] if self.path else None
@@ -84,14 +85,22 @@ class Car:
     def initialise_on_queue(self):
         """Looks at the origin node edges and picks one randomly to queue up there at the start of its journey"""
         init_node = self.map.nodes[f'{self.origin}']
+
+        edge_labels = init_node.edge_labels
+
         possible_edges = list(init_node.queues.keys())
+        # Do not use the edge along which it has to travel first as a potential pseudo-edge it uses for 
+        # initialisation i.e. do not force any U-turns at the start
+        possible_edges.remove(edge_labels[str(self.next)])
+
         edge_choice = random.choice(possible_edges)
         # Add car instance to a particular edge at origin node
         init_node.queues[str(edge_choice)].append(self)
-
-        for edge_node_number in init_node.edge_labels:
-            if init_node.edge_labels[edge_node_number] == edge_choice:
-                return edge_node_number
+        init_node.update_pointers()
+        
+        for edge_node_number in edge_labels:
+            if edge_labels[edge_node_number] == edge_choice:
+                return int(edge_node_number)
         print('Check initialise_on_queue() method')
 
 

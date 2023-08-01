@@ -19,14 +19,17 @@ class Environment:
     def initialise_cars(self, num_cars):
         cars_list = []
         for index in range(num_cars):
-            start = random.randrange(0, self.map.num_nodes - 1)
+            start = random.randrange(0, self.map.num_nodes)
             stop = random.randrange(0, self.map.num_nodes)
-            if stop == start:
-                stop += 1
+            # if stop == start:
+            #     stop += 1
+            while stop == start:
+                stop = random.randrange(0, self.map.num_nodes)
             
+            print(start, stop)
             car = Car(index, self.map, start, stop)
 
-            car.initialise_on_queue()
+            # car.initialise_on_queue()
 
             cars_list.append(car)
             
