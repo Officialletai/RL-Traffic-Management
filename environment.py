@@ -110,15 +110,32 @@ class Environment:
 
                 # if we reach the end of this road, it must be finished
                 if car.finished:
-
+                    print(f'car {car.id} has finished')
                     reward = car.calculate_reward()
                     self.score += reward
                     self.cars.remove(car)
                 continue 
             
             # if car is not edge, it must be in queue
+            # if car is on road and has more intersections to get through, check them
+            # if no more intersections after the coming node, it is moving towards destination
+            # it will just join any queue and end there.
             if car.on_edge:
-                car.move(True)
+                if car.path[1]:
+                    next_node = car.path[1]
+                else:
+                    car.move(True)
+                
+                current_node_labels = self.map.nodes[str(next_node)].edge_labels
+                previous_node_label = current_node_labels[str(previous_node)]
+                next_node_label = current_node_labels[str(next_node)]
+                
+                # Get the traffic light instance
+                traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]
+                traffic_light_state = traffic_light.state
+
+                # car.move(traffic light color)
+                car.move(traffic_light_state)
             else:
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
