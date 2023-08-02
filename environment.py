@@ -26,7 +26,6 @@ class Environment:
             while stop == start:
                 stop = random.randrange(0, self.map.num_nodes)
             
-            print(start, stop)
             car = Car(index, self.map, start, stop)
 
             # car.initialise_on_queue()
@@ -117,9 +116,9 @@ class Environment:
                     self.cars.remove(car)
                 continue 
             
-            # if car is not edge, it must be finished or in queue
+            # if car is not edge, it must be in queue
             if car.on_edge:
-                pass
+                car.move(True)
             else:
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]

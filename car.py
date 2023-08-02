@@ -46,6 +46,7 @@ class Car:
 
         self.on_edge = False # True
         self.finished = bool(self.current == self.destination)
+        self.speed = 0
 
     def get_location(self):
         """
@@ -97,11 +98,10 @@ class Car:
 
         else:
             possible_edges.remove(edge_labels[str(self.next)])
-
             edge_choice = random.choice(possible_edges)
+            
             # Add car instance to a particular edge at origin node
             init_node.queues[str(edge_choice)].append(self)
-
             init_node.update_pointers()
         
             for edge_node_number in edge_labels:
@@ -111,23 +111,35 @@ class Car:
 
 
     def get_queue(self):
-            
-            #####
-            current_node = self.map.nodes[str(self.current)]
+            # could also restate this as -> if on edge get the queue of the destination node
+            if self.on_edge:
+                current_node = self.map.nodes[str(self.next)]
+                print('next node', self.next)
+                if self.map.intersections[self.next] == 1:
+                    print('current_node.queues', current_node.queues)
+                    print('current_node.queues[A]', current_node.queues['A'])
+                    return current_node.queues['A'] 
+            else:
+                current_node = self.map.nodes[str(self.current)]
+                print('current node', self.current)
+                if self.map.intersections[self.current] == 1:
+                    print('current_node.queues', current_node.queues)
+                    print('current_node.queues[B]', current_node.queues['B'])
+                    return current_node.queues['B']
 
             # if only 1 intersection -> incoming / outgoing queue only
-            if self.map.intersections[self.current] == 1:
-                print('current_node.queues', current_node.queues)
-                print('current_node.queues[B]', current_node.queues['B'])
-                return
-            
-
+            print('intersections: ', self.map.intersections)
+           
+            print('path', self.path)
+            print(current_node.edge_labels)
+            print('self.previosu', self.previous)
+            print('self.current', self.current)
+            print('self.next', self.next)
             current_edge_label = current_node.edge_labels[str(self.previous)]
             queue = current_node.queues[str(current_edge_label)]
 
             return queue
-            #####
-
+    
             # # node = previous node / from 
             # node = self.map.nodes[f'{self.previous}']
             # # get edge label of current node 
@@ -143,8 +155,12 @@ class Car:
         next_edge_label = current_node.edge_labels[str(self.next)]
 
         pointers = current_node.pointers
-        print(pointers)
-        current_pointer = pointers[current_edge_label][next_edge_label]
+
+        # if terminal node 
+        if len(pointers) == 1:
+            current_pointer = pointers[current_edge_label]
+        else:
+            current_pointer = pointers[current_edge_label][next_edge_label]
 
         return current_pointer == self
 
@@ -189,23 +205,28 @@ class Car:
             light_green (bool): Whether the light at the current node is green.
         """
         queue = self.get_queue()
+
+         # Compute the car's speed based on the previous road's weight (cost)
+        if self.path_cost:
+            speed = (1 / self.path_cost[0]) * 100
+            self.speed = speed
+        else:
+            speed = self.speed
+
         # If a car is not on the road, it is in queue so it cannot move forward but time still passes
         # if a car is at the front of the queue, the node class will pop the car out of the queue
         if self.on_edge == False:
             if self.if_front_of_queue():
+                print(queue)
                 queue.remove(self)
                 
                 current_node = self.map.nodes[str(self.current)]
                 current_node.update_pointers()
+                self.update_navigation()
 
             else:
                 self.time += 1
-            
-            return
-
-        
-        # Compute the car's speed based on the previous road's weight (cost)
-        speed = (1 / self.path_cost[0]) * 100
+                return
 
         # Move the car along the previous road at the computed speed
         if self.road_progress < 100:
@@ -226,7 +247,7 @@ class Car:
             print('queue', queue, len(queue))
             if queue and len(queue) > 0:
                 queue.append(self)
-                
+                self.current = self.next
                 # if car join queue, car no longer on edge
                 self.on_edge = False
                 
@@ -237,9 +258,8 @@ class Car:
 
         # if traffic light is red and we are at end of road, we must join the correct queue
         elif self.road_progress >= 100 and not light_green:
-            queue = self.get_queue()
             queue.append(self)
-
+            self.current = self.next
             # if car join queue, car no longer on edge
             self.on_edge = False
 
@@ -298,6 +318,10 @@ if __name__ == '__main__':
     stop = random.randrange(5, london.num_nodes - 1)
     while stop == start:
         stop = random.randrange(0, london.num_nodes - 1)
+    
+    print('start,', start)
+    print('stop,', stop)
+
     car_0 = Car(0, london, start, stop)
     shortest_path = car_0.path_finder()
     print(car_0.path)
