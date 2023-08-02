@@ -21,10 +21,6 @@ class Car:
             time (int, optional): The time elapsed since the car started its journey. Defaults to 0.
         """
         
-        
-        # Set the random seed
-        random.seed(28062023)
-        
         self.id = car_id 
         self.map = map_
         self.origin = origin
@@ -91,26 +87,41 @@ class Car:
         possible_edges = list(init_node.queues.keys())
         # Do not use the edge along which it has to travel first as a potential pseudo-edge it uses for 
         # initialisation i.e. do not force any U-turns at the start
-        possible_edges.remove(edge_labels[str(self.next)])
 
-        edge_choice = random.choice(possible_edges)
-        # Add car instance to a particular edge at origin node
-        init_node.queues[str(edge_choice)].append(self)
-        init_node.update_pointers()
-        
-        for edge_node_number in edge_labels:
-            if edge_labels[edge_node_number] == edge_choice:
+        if self.map.intersections[self.origin] == 1:
+            
+            init_node.queues['B'].append(self)
+
+            for edge_node_number in edge_labels:
                 return int(edge_node_number)
-        print('Check initialise_on_queue() method')
+
+        else:
+            possible_edges.remove(edge_labels[str(self.next)])
+
+            edge_choice = random.choice(possible_edges)
+            # Add car instance to a particular edge at origin node
+            init_node.queues[str(edge_choice)].append(self)
+
+            init_node.update_pointers()
+        
+            for edge_node_number in edge_labels:
+                if edge_labels[edge_node_number] == edge_choice:
+                    return int(edge_node_number)
+            print('Check initialise_on_queue() method')
 
 
     def get_queue(self):
-            # if only 1 intersection -> no traffic light -> no queue
-            if not self.current or self.map.intersections[self.current] == 1:
-                return None
             
             #####
             current_node = self.map.nodes[str(self.current)]
+
+            # if only 1 intersection -> incoming / outgoing queue only
+            if self.map.intersections[self.current] == 1:
+                print('current_node.queues', current_node.queues)
+                print('current_node.queues[B]', current_node.queues['B'])
+                return
+            
+
             current_edge_label = current_node.edge_labels[str(self.previous)]
             queue = current_node.queues[str(current_edge_label)]
 
@@ -132,6 +143,7 @@ class Car:
         next_edge_label = current_node.edge_labels[str(self.next)]
 
         pointers = current_node.pointers
+        print(pointers)
         current_pointer = pointers[current_edge_label][next_edge_label]
 
         return current_pointer == self

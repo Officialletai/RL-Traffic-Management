@@ -106,7 +106,7 @@ class Environment:
 
             # if the car is at the end of its destination and the node is a dead end
             # move as though there was a green light (no traffic light exists there)
-            if not next_node and self.map.intersections[current_node] == 1:
+            if self.map.intersections[current_node] == 1:
                 car.move(light_green=True)
 
                 # if we reach the end of this road, it must be finished
@@ -125,9 +125,9 @@ class Environment:
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
                 # traffic_light_state = traffic_light.state
 
-                current_node_labels = self.map.nodes[current_node].edge_labels
-                previous_node_label = current_node_labels[previous_node]
-                next_node_label = current_node_labels[next_node]
+                current_node_labels = self.map.nodes[str(current_node)].edge_labels
+                previous_node_label = current_node_labels[str(previous_node)]
+                next_node_label = current_node_labels[str(next_node)]
                 
                 # Get the traffic light instance
                 traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]

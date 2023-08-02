@@ -28,7 +28,14 @@ class Node:
 
             # Pick a random phase to initialise the node
             self.phase = random.choice(self.phase_numbers)
+
         else:
+            # if terminal node / degree == 1: create outgoing and incoming queue
+            queues = {}
+            queues['A'] = []
+            queues['B'] = []
+            self.queues = queues
+
             self.phase = 0
 
     def get_edge_labels(self):
