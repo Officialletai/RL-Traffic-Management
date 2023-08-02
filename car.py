@@ -114,27 +114,15 @@ class Car:
             # could also restate this as -> if on edge get the queue of the destination node
             if self.on_edge:
                 current_node = self.map.nodes[str(self.next)]
-                print('next node', self.next)
                 if self.map.intersections[self.next] == 1:
-                    print('current_node.queues', current_node.queues)
-                    print('current_node.queues[A]', current_node.queues['A'])
+
                     return current_node.queues['A'] 
             else:
                 current_node = self.map.nodes[str(self.current)]
-                print('current node', self.current)
                 if self.map.intersections[self.current] == 1:
-                    print('current_node.queues', current_node.queues)
-                    print('current_node.queues[B]', current_node.queues['B'])
                     return current_node.queues['B']
 
             # if only 1 intersection -> incoming / outgoing queue only
-            print('intersections: ', self.map.intersections)
-           
-            print('path', self.path)
-            print(current_node.edge_labels)
-            print('self.previosu', self.previous)
-            print('self.current', self.current)
-            print('self.next', self.next)
             current_edge_label = current_node.edge_labels[str(self.previous)]
             queue = current_node.queues[str(current_edge_label)]
 
@@ -217,7 +205,6 @@ class Car:
         # if a car is at the front of the queue, the node class will pop the car out of the queue
         if self.on_edge == False:
             if self.if_front_of_queue():
-                print(queue)
                 queue.remove(self)
                 
                 current_node = self.map.nodes[str(self.current)]
@@ -244,7 +231,6 @@ class Car:
 
             # if queue exists and not empty
             # join queue, and now off road
-            print('queue', queue, len(queue))
             if queue and len(queue) > 0:
                 queue.append(self)
                 self.current = self.next

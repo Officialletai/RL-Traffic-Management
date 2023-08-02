@@ -102,6 +102,7 @@ class Environment:
             previous_node = car.previous
             next_node = car.next
 
+            print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress)
 
             # if the car is at the end of its destination and the node is a dead end
             # move as though there was a green light (no traffic light exists there)
@@ -151,6 +152,8 @@ class Environment:
 
                 # car.move(traffic light color)
                 car.move(traffic_light_state)
+
+            print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
         reward = None 
         finished = None
