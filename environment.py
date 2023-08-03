@@ -134,8 +134,8 @@ class Environment:
                 else:
                     any_green = False
                     
-                    for key in car.map.nodes[car.next].traffic_lights[previous_node_label]:
-                        if car.map.nodes[car.next].traffic_lights[previous_node_label][str(key)].state == 1:
+                    for key in car.map.nodes[str(car.next)].traffic_lights[previous_node_label]:
+                        if car.map.nodes[str(car.next)].traffic_lights[previous_node_label][str(key)].state == 1:
                             any_green = True
 
                     car.move(any_green)
@@ -146,7 +146,7 @@ class Environment:
                 next_node_label = current_node_labels[str(next_node)]
                 
                 # Get the traffic light instance
-                traffic_light = self.map.nodes[str(current_node)].traffic_lights[str(previous_node_label)][str(next_node_label)]
+                traffic_light = self.map.nodes[str(car.next)].traffic_lights[str(previous_node_label)][str(next_node_label)]
                 traffic_light_state = traffic_light.state
 
                 # car.move(traffic light color)
@@ -166,8 +166,8 @@ class Environment:
                 else:
                     any_green = False
                     print('previous node label, ', previous_node_label)
-                    for key in car.map.nodes[car.next].traffic_lights[previous_node_label]:
-                        if car.map.nodes[car.next].traffic_lights[previous_node_label][str(key)].state == 1:
+                    for key in car.map.nodes[str(car.next)].traffic_lights[previous_node_label]:
+                        if car.map.nodes[str(car.next)].traffic_lights[previous_node_label][str(key)].state == 1:
                             any_green = True
                             
                     car.move(any_green)
