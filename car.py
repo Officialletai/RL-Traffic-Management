@@ -45,7 +45,7 @@ class Car:
         self.reward = 0
 
         self.on_edge = False # True
-        self.finished = bool(self.current == self.destination)
+        self.finished = False #bool(self.current == self.destination)
         self.speed = 0
 
     def get_location(self):
@@ -78,6 +78,8 @@ class Car:
             total_time_weights += (edge.time_weight[0])
 
         self.reward = total_time_weights - self.time
+        print('total time weights,', total_time_weights, 'self.time,', self.time)
+        return self.reward
     
     def initialise_on_queue(self):
         """Looks at the origin node edges and picks one randomly to queue up there at the start of its journey"""
@@ -216,7 +218,7 @@ class Car:
         """
         queue = self.get_queue()
 
-         # Compute the car's speed based on the previous road's weight (cost)
+        # Compute the car's speed based on the previous road's weight (cost)
         if self.path_cost:
             speed = (1 / self.path_cost[0]) * 100
             self.speed = speed
@@ -244,6 +246,11 @@ class Car:
         # Ensure road progress does not exceed 100
         if self.road_progress > 100:  
             self.road_progress = 100
+
+        if self.next == self.destination and self.road_progress == 100:
+            self.finished = True
+            self.time += 1
+            return
 
         # If the car has reached the end of the road and the light is green
         if self.road_progress >= 100 and light_green:

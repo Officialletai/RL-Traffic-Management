@@ -84,6 +84,8 @@ class Environment:
 
 
     def step(self, actions):
+        
+        not_finished = True
 
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
@@ -98,6 +100,15 @@ class Environment:
 
             if on edge, 
             """
+            if car.finished:
+                print(f'car {car.id} has finished')
+                reward = car.calculate_reward()
+                self.score += reward
+                self.cars.remove(car)
+                continue
+            else:
+                not_finished = False
+
             current_node = car.current
             previous_node = car.previous
             next_node = car.next
@@ -109,12 +120,6 @@ class Environment:
             if current_node and self.map.intersections[current_node] == 1:
                 car.move(light_green=True)
                 print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
-                # if we reach the end of this road, it must be finished
-                if car.finished:
-                    print(f'car {car.id} has finished')
-                    reward = car.calculate_reward()
-                    self.score += reward
-                    self.cars.remove(car)
                 continue 
             
             # if car is not edge, it must be in queue
@@ -174,10 +179,8 @@ class Environment:
 
             print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
-        reward = None 
-        finished = None
-                     
-        return self.get_state(), reward, finished
+
+        return self.get_state(), self.score, not_finished
 
 
 if __name__ =='__main__':
