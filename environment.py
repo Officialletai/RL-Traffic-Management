@@ -126,19 +126,14 @@ class Environment:
                 
                 current_node_labels = self.map.nodes[str(next_node)].edge_labels
                 
-                #print('previous node ', previous_node, 'current node labels, ', current_node_labels)
+                print('previous node ', previous_node, 'current node labels, ', current_node_labels)
+                
                 previous_node_label = current_node_labels[str(previous_node)]
 
                 if len(car.path) > 1:
                     next_node = car.path[1]
                 else:
-                    any_green = False
-                    
-                    for key in car.map.nodes[str(car.next)].traffic_lights[previous_node_label]:
-                        if car.map.nodes[str(car.next)].traffic_lights[previous_node_label][str(key)].state == 1:
-                            any_green = True
-
-                    car.move(any_green)
+                    car.move(True)
                     continue
 
 
@@ -164,13 +159,7 @@ class Environment:
                 if len(car.path) > 1:
                     next_node = car.path[1]
                 else:
-                    any_green = False
-                    print('previous node label, ', previous_node_label)
-                    for key in car.map.nodes[str(car.next)].traffic_lights[previous_node_label]:
-                        if car.map.nodes[str(car.next)].traffic_lights[previous_node_label][str(key)].state == 1:
-                            any_green = True
-                            
-                    car.move(any_green)
+                    car.move(True)
                     continue
 
 

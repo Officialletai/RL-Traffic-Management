@@ -180,16 +180,18 @@ class Car:
         self.road_progress = 0
         self.previous = self.current
         self.path.pop(0)
-        self.path_cost.pop(0)
+        
+        if self.path_cost:
+            self.path_cost.pop(0)
 
         #######
         if self.path:
             self.current = None
-            self.next = self.path[0]
+            #self.next = self.path[0]
             self.road = self.map.adjacency[self.previous, self.next]
         else:
             self.current = self.current
-            self.next = None
+            #self.next = None
             self.road = None
             self.on_edge = False
             self.finished = True
@@ -253,12 +255,21 @@ class Car:
             # join queue, and now off road
             if queue and len(queue) > 0:
                 queue.append(self)
+
                 self.current = self.next
+                
+                if len(self.path) > 1:
+                    self.next = self.path[1]
+                else:
+                    self.next = None
+
                 # if car join queue, car no longer on edge
                 self.on_edge = False
+
                 
             # if queue is empty or does not exist we go to the next road
             else:
+
                 self.update_navigation()
 
 
