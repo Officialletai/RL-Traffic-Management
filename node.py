@@ -108,6 +108,11 @@ class Node:
         """
         pointers = {}
         keys = 'ABCD'
+        
+        if self.degree == 1:
+            pointers['A'] = None
+            pointers['B'] = None
+            return pointers
 
         for i in range(self.degree):
             # pointers[keys[i]] = [None for next_edge in range(self.degree - 1)]
@@ -121,6 +126,15 @@ class Node:
         could change whenever a car leaves or joins the queue. 'None' type is used for when there are no cars in a
         particular queue wanting to go to an edge. 
         """
+        if self.degree == 1:
+            # Track the first car in the incoming queue ('A') if there is one
+            # this is sufficient because there is only one possible next edge
+            self.pointers['A'] = self.queues['A'][0] if self.queues['A'] else None
+            # Track the first car in the outgoing queue ('B') if there is one
+            self.pointers['B'] = self.queues['B'][0] if self.queues['B'] else None
+            return
+
+
         for edge in self.pointers:
             edge_destinations = [self.edge_labels[str(car.next)] for car in self.queues[edge]]
             for pointer in self.pointers[edge]:
@@ -130,23 +144,4 @@ class Node:
                 except:
                     self.pointers[edge][pointer] = None
     
-    def remove_car(self):
-        """
-        Uses the current phase of the node to decifer which traffic lights are green or red to remove cars from queues
-        at particular edges and set them off to their journey onto the next edge/road (if the light for the journey from
-        the current edge to the next edge via the node is green).
 
-        One call to this function removes the first car from each edge wanting to go to any other edge as permitted by the
-        lights at that time (i.e. removes a car for every legal journey given the phase/lights)
-        """
-        for edge in self.phases[f'phase_{self.phase}']:
-            for next_edge in self.phases[f'phase_{self.phase}'][edge]:
-                 
-                if self.phases[f'phase_{self.phase}'][edge][next_edge] == 1:
-                    car_object = self.queues[edge].pop(self.pointer[edge][next_edge])
-                    car_object.update_navigation()
-        
-        self.update_pointers()
-
-# it has degree queues
-# it has degree x (degree-1) traffic lights for fully defined case

@@ -136,18 +136,38 @@ class Car:
             # translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
             # return node.queues[translation]
     
+    def random_next_edge(self):
+        current_node = self.map.nodes[str(self.current)]
+        current_edge_label = current_node.edge_labels[str(self.previous)]
+
+        if current_node.degree != 1:
+
+            if len(self.path) > 1:
+                next_edge_label = current_node.edge_labels[str(self.path[1])]
+            else:
+                # if self.next is none, select a random edge label
+                possible_edges = list(current_node.edge_labels.values())
+                # exclude the current edge label from the selection
+                possible_edges.remove(current_edge_label)
+                next_edge_label = random.choice(possible_edges)
+
+        return next_edge_label
+
 
     def if_front_of_queue(self):
         current_node = self.map.nodes[str(self.current)]
         current_edge_label = current_node.edge_labels[str(self.previous)]
-        next_edge_label = current_node.edge_labels[str(self.next)]
 
         pointers = current_node.pointers
 
         # if terminal node 
-        if len(pointers) == 1:
+        
+        if current_node.degree == 1:
             current_pointer = pointers[current_edge_label]
         else:
+
+            next_edge_label = self.random_next_edge()
+
             current_pointer = pointers[current_edge_label][next_edge_label]
 
         return current_pointer == self

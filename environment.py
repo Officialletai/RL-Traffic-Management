@@ -106,9 +106,9 @@ class Environment:
 
             # if the car is at the end of its destination and the node is a dead end
             # move as though there was a green light (no traffic light exists there)
-            if self.map.intersections[current_node] == 1:
+            if current_node and self.map.intersections[current_node] == 1:
                 car.move(light_green=True)
-
+                print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
                 # if we reach the end of this road, it must be finished
                 if car.finished:
                     print(f'car {car.id} has finished')
@@ -122,13 +122,27 @@ class Environment:
             # if no more intersections after the coming node, it is moving towards destination
             # it will just join any queue and end there.
             if car.on_edge:
-                if car.path[1]:
-                    next_node = car.path[1]
-                else:
-                    car.move(True)
+                
                 
                 current_node_labels = self.map.nodes[str(next_node)].edge_labels
+                
+                #print('previous node ', previous_node, 'current node labels, ', current_node_labels)
                 previous_node_label = current_node_labels[str(previous_node)]
+
+                if len(car.path) > 1:
+                    next_node = car.path[1]
+                else:
+                    any_green = False
+                    
+                    for key in car.map.nodes[car.next].traffic_lights[previous_node_label]:
+                        if car.map.nodes[car.next].traffic_lights[previous_node_label][str(key)].state == 1:
+                            any_green = True
+
+                    car.move(any_green)
+                    continue
+
+
+
                 next_node_label = current_node_labels[str(next_node)]
                 
                 # Get the traffic light instance
@@ -142,8 +156,24 @@ class Environment:
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
                 # traffic_light_state = traffic_light.state
 
+               
                 current_node_labels = self.map.nodes[str(current_node)].edge_labels
+                #print('next node ', next_node, 'current node labels, ', current_node_labels)
                 previous_node_label = current_node_labels[str(previous_node)]
+
+                if len(car.path) > 1:
+                    next_node = car.path[1]
+                else:
+                    any_green = False
+                    print('previous node label, ', previous_node_label)
+                    for key in car.map.nodes[car.next].traffic_lights[previous_node_label]:
+                        if car.map.nodes[car.next].traffic_lights[previous_node_label][str(key)].state == 1:
+                            any_green = True
+                            
+                    car.move(any_green)
+                    continue
+
+
                 next_node_label = current_node_labels[str(next_node)]
                 
                 # Get the traffic light instance
