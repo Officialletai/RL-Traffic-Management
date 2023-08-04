@@ -78,7 +78,7 @@ class Car:
             total_time_weights += (edge.time_weight[0])
 
         self.reward = total_time_weights - self.time
-        print('total time weights,', total_time_weights, 'self.time,', self.time)
+        #print('total time weights,', total_time_weights, 'self.time,', self.time)
         return self.reward
     
     def initialise_on_queue(self):
@@ -94,6 +94,7 @@ class Car:
         if self.map.intersections[self.origin] == 1:
             
             init_node.queues['B'].append(self)
+            init_node.update_pointers()
 
             for edge_node_number in edge_labels:
                 return int(edge_node_number)
@@ -165,7 +166,8 @@ class Car:
         # if terminal node 
         
         if current_node.degree == 1:
-            current_pointer = pointers[current_edge_label]
+            current_pointer = pointers['B'] 
+            
         else:
 
             next_edge_label = self.random_next_edge()

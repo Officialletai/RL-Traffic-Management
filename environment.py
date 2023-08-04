@@ -76,6 +76,11 @@ class Environment:
         for node in range(self.map.num_nodes):
             nodal_traffic_lights = self.map.nodes[str(node)].traffic_lights
             node_legal_journeys_counter = 0
+
+            # if len(nodal_traffic_lights) == 1:
+            #     node_legal_journeys_counter += 1
+            #     continue
+
             for current_edge in nodal_traffic_lights:
                 for next_edge in nodal_traffic_lights[current_edge]:
                     traffic_light_matrix[node, node_legal_journeys_counter] = nodal_traffic_lights[current_edge][next_edge].state
@@ -86,7 +91,7 @@ class Environment:
 
     def step(self, actions):
         
-        not_finished = True
+        finished = True
 
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
@@ -108,20 +113,13 @@ class Environment:
                 self.cars.remove(car)
                 continue
             else:
-                not_finished = False
+                finished = False
 
             current_node = car.current
             previous_node = car.previous
             next_node = car.next
 
             print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress)
-
-            # if the car is at the end of its destination and the node is a dead end
-            # move as though there was a green light (no traffic light exists there)
-            if current_node and self.map.intersections[current_node] == 1:
-                car.move(light_green=True)
-                print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
-                continue 
             
             # if car is not edge, it must be in queue
             # if car is on road and has more intersections to get through, check them
@@ -136,12 +134,13 @@ class Environment:
                 
                 previous_node_label = current_node_labels[str(previous_node)]
 
+                # if there are more nodes to go through, check the next next node
+                # otherwise, this is the final destination, so move into the node and finish
                 if len(car.path) > 1:
                     next_node = car.path[1]
                 else:
                     car.move(True)
                     continue
-
 
 
                 next_node_label = current_node_labels[str(next_node)]
@@ -162,6 +161,9 @@ class Environment:
                 #print('next node ', next_node, 'current node labels, ', current_node_labels)
                 previous_node_label = current_node_labels[str(previous_node)]
 
+
+                # if there are more nodes to go through, check the next next node
+                # otherwise, this is the final destination, so move into the node and finish
                 if len(car.path) > 1:
                     next_node = car.path[1]
                 else:
@@ -181,7 +183,7 @@ class Environment:
             print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
 
-        return self.get_state(), self.score, not_finished
+        return self.get_state(), self.score, finished
 
 
 if __name__ =='__main__':

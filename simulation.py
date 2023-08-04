@@ -16,7 +16,7 @@ print_current_state(simulation)
 
 # each action is a node phase pairing
 # the actions is a list of actions
-action_1 = [(4,2)]
+action_1 = []
 
 
 simulation.step(action_1)

@@ -35,7 +35,9 @@ class Node:
             queues['A'] = []
             queues['B'] = []
             self.queues = queues
-
+            
+            self.traffic_lights['B'] = {'A': Light(0)}
+            
             self.phase = 0
 
     def get_edge_labels(self):
