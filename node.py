@@ -30,14 +30,19 @@ class Node:
             self.phase = random.choice(self.phase_numbers)
 
         else:
-            # if terminal node / degree == 1: create outgoing and incoming queue
+            # if terminal node / degree == 1: create incoming and outgoing queue respectively
             queues = {}
             queues['A'] = []
             queues['B'] = []
             self.queues = queues
             
+            self.traffic_lights['A'] = {'B': Light(0)}
             self.traffic_lights['B'] = {'A': Light(0)}
             
+            index_of_connected_node = int(np.nonzero(self.connections)[0])
+
+            self.edge_labels = {self.label: 'A', str(index_of_connected_node) : 'B'}
+
             self.phase = 0
 
     def get_edge_labels(self):

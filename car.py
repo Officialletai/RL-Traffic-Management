@@ -218,11 +218,12 @@ class Car:
         Args:
             light_green (bool): Whether the light at the current node is green.
         """
+        #print('car_id:', self.id, 'light:', light_green, 'on_edge:', self.on_edge)
         queue = self.get_queue()
 
         # Compute the car's speed based on the previous road's weight (cost)
         if self.path_cost:
-            speed = (1 / self.path_cost[0]) * 33
+            speed = (1 / self.path_cost[0]) * 100
             self.speed = speed
         else:
             speed = self.speed
@@ -231,12 +232,17 @@ class Car:
         # if a car is at the front of the queue, the node class will pop the car out of the queue
         if self.on_edge == False:
             if self.if_front_of_queue():
-                queue.remove(self)
-                
-                current_node = self.map.nodes[str(self.current)]
-                current_node.update_pointers()
-                self.update_navigation()
 
+                if light_green == True:
+                    queue.remove(self)
+                    
+                    current_node = self.map.nodes[str(self.current)]
+                    current_node.update_pointers()
+                    self.update_navigation()
+                
+                else: 
+                    self.time += 1
+                    return
 
             else:
                 self.time += 1

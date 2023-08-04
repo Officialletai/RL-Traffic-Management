@@ -1,8 +1,10 @@
+import random
+
 # State space for individual traffic light = R/G, or in binary 0/1
 
 class Light:
     def __init__(self, current_time):
-        self.state = 0
+        self.state = 0 #random.choice([0,1])
         self.last_changed = 0
         self.current_time = current_time
 
@@ -19,7 +21,7 @@ class Light:
     def if_changable(self):
         # If we want to hardcode to enforce periods when lights are unchangable 
         # ive denoted it as 4 time periods as an example
-        if self.current_time > self.last_changed + 4:
+        if self.current_time > self.last_changed + 1:
             return True
         return False 
     

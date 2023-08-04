@@ -142,7 +142,7 @@ class Environment:
                     car.move(True)
                     continue
 
-
+                #print('next node:', next_node, 'current node:', current_node)
                 next_node_label = current_node_labels[str(next_node)]
                 
                 # Get the traffic light instance
