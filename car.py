@@ -220,7 +220,7 @@ class Car:
 
         # Compute the car's speed based on the previous road's weight (cost)
         if self.path_cost:
-            speed = (1 / self.path_cost[0]) * 100
+            speed = (1 / self.path_cost[0]) * 33
             self.speed = speed
         else:
             speed = self.speed
@@ -276,7 +276,7 @@ class Car:
                 
             # if queue is empty or does not exist we go to the next road
             else:
-
+                self.current = self.next
                 self.update_navigation()
 
 

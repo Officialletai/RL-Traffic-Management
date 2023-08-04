@@ -64,6 +64,7 @@ class Environment:
             # if the car is on the edge, we can add it to the edge matrix
             # otherwise add it to the queue matrix
             if car.on_edge == True:
+                print('car id:', car.id, 'car previous:', car.previous, 'car next:', car.next)
                 edge_matrix[car.previous][car.next] += 1
             else:
                 queue_matrix[car.current][car.next] += 1

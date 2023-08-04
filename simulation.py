@@ -18,5 +18,8 @@ print_current_state(simulation)
 # the actions is a list of actions
 action_1 = [(4,2)]
 
+
 simulation.step(action_1)
-print_current_state(simulation)
+simulation.step(action_1)
+simulation.step(action_1)
+
