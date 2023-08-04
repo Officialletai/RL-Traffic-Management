@@ -22,4 +22,5 @@ action_1 = [(4,2)]
 simulation.step(action_1)
 simulation.step(action_1)
 simulation.step(action_1)
-
+simulation.step(action_1)
+simulation.step(action_1)

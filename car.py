@@ -235,6 +235,7 @@ class Car:
                 current_node.update_pointers()
                 self.update_navigation()
 
+
             else:
                 self.time += 1
                 return
@@ -277,6 +278,10 @@ class Car:
             # if queue is empty or does not exist we go to the next road
             else:
                 self.current = self.next
+                if len(self.path) > 1:
+                    self.next = self.path[1]
+                else:
+                    self.next = None
                 self.update_navigation()
 
 
