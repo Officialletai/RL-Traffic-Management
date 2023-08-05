@@ -42,17 +42,6 @@ class Controller:
             # 0 = Red, 1 = Green
             # "A": {"B" : 1},
             # "B": {"A" : 1},
-       
-    def get_move_set(self):
-        move_set = [i for i in range(self.map.num_nodes)]
-        for node_number in move_set:
-            if self.map.intersections[node_number] == 1:
-                move_set.remove(node_number)
-
-        # move to end turn, because technically AI can keep picking moves infintely
-        # alternatively this can be used if AI picks moves == num_nodes and phase == 0 == do nothing
-        #move_set.append(-1)
-        return move_set
     
 
     def get_phase(self, num_intersections):
@@ -63,7 +52,7 @@ class Controller:
         elif num_intersections == 2:
             return self.two_way_move_set
         else:
-            return 0
+            return self.two_way_move_set
 
     
     def change_traffic_lights(self, node_number, phase_number):
@@ -71,8 +60,8 @@ class Controller:
         phase_key = "phase_" + str(phase_number)
         
         # if number of intersection == 1 or phase_number == 0, skip:
-        if self.map.intersections[node_number] == 1 or phase_number == 0:
-            return
+        # if self.map.intersections[node_number] == 1 or phase_number == 0:
+        #     return
 
         # Get the appropriate phase dictionary
         phases = self.get_phase(self.map.intersections[node_number])
@@ -99,12 +88,15 @@ class Controller:
         for i in keys[0:self.map.intersections[node_number]]:
             for j in keys[0:self.map.intersections[node_number]]:
                 if i!=j:
-                    print(f'Node {node_number} Current Light State:')
-                    print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
-                    print('Changing Lights...')
+                    # print(f'Node {node_number} Current Light State:')
+                    # print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
+                    # print('Changing Lights...')
                     self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state = phase[str(i)][str(j)]
-                    print('New Light State:')
-                    print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
+                    # print('New Light State:')
+                    # print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
+                elif i == j and self.map.intersections[node_number] == 1:
+                    self.map.nodes[str(node_number)].traffic_lights['A']['B'].state = phase['A']['B']
+                    self.map.nodes[str(node_number)].traffic_lights['B']['A'].state = phase['B']['A']
 
  
 if __name__ == "__main__":

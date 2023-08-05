@@ -223,7 +223,7 @@ class Car:
 
         # Compute the car's speed based on the previous road's weight (cost)
         if self.path_cost:
-            speed = (1 / self.path_cost[0]) * 100
+            speed = (1 / self.path_cost[0]) * 20
             self.speed = speed
         else:
             speed = self.speed
