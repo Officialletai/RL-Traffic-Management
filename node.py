@@ -21,8 +21,7 @@ class Node:
         - queues (dict): Holds the queues for each connection.
         - pointers (dict): Tracks the front of the queues.
         - edge_labels (dict): Dictionary mapping connections to labels 'A', 'B', etc.
-        - phases (list): List of traffic light phases for the node.
-        - phase_numbers (list): List of phase numbers corresponding to the phases.
+        - phases (list): List of possible traffic light phases for the node.
         - phase (int): Current phase of the node.
         """
         self.label = label
@@ -43,10 +42,10 @@ class Node:
                 self.phases = json.load(file)
 
             # Store the phase numbers (i.e. 1,2,3....)
-            self.phase_numbers = [i+1 for i in range(len(self.phases))]
+            phase_numbers = [i+1 for i in range(len(self.phases))]
 
             # Pick a random phase to initialise the node
-            self.phase = random.choice(self.phase_numbers)
+            self.phase = random.choice(phase_numbers)
 
         else:
             # if terminal node / degree == 1: create incoming and outgoing queue respectively
@@ -54,7 +53,7 @@ class Node:
             self.traffic_lights = {'A': {'B': Light(0)}, 'B': {'A': Light(0)}}
             index_of_connected_node = next((i for i, val in enumerate(self.connections) if val), 0)
             self.edge_labels = {self.label: 'A', str(index_of_connected_node) : 'B'}
-            self.phase = 0
+            self.phase = 1
 
     def get_edge_labels(self):
         """

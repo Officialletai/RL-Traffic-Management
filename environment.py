@@ -8,6 +8,16 @@ import random
 
 class Environment:
     def __init__(self):
+        """
+        Initializes the environment.
+        
+        Attributes:
+        - map (Map): An instance of the Map class representing the environment layout.
+        - cars (list): List of Car objects within the environment.
+        - controller (Controller): Controls the traffic light system.
+        - time (int): Keeps track of the simulation time.
+        - score (int): Evaluation metric, quantifies how well cars navigate the environment.
+        """
         self.map = Map()
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
@@ -17,6 +27,15 @@ class Environment:
 
 
     def initialise_cars(self, num_cars):
+        """
+        Initializes the cars in the environment.
+        
+        Args:
+        - num_cars (int): Number of cars to be initialized.
+
+        Returns:
+        - list: List of Car objects.
+        """
         cars_list = []
         for index in range(num_cars):
             start = random.randrange(0, self.map.num_nodes)
@@ -37,6 +56,12 @@ class Environment:
 
 
     def reset(self):
+        """
+        Resets the environment to its initial state.
+        
+        Returns:
+        - tuple: Represents the state of the environment after reset.
+        """
         self.map = Map()
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
@@ -47,6 +72,12 @@ class Environment:
         return self.get_state()
 
     def get_state(self):
+        """
+        Fetches the current state of the environment.
+        
+        Returns:
+        - tuple: Tuple containing matrices representing the state of the environment.
+        """
         # adjacency matrix weights
         weight_matrix = self.map.weight_matrix
         max_weight = weight_matrix.max()
@@ -136,22 +167,22 @@ class Environment:
         return state
     
     def step(self, actions):
+        """
+        Advances the simulation by one step. This function updates the state 
+        of the environment based on the actions provided.
         
+        Args:
+        - actions (list of tuples): Each tuple contains a node and a phase number to set the traffic light to.
+        
+        Returns:
+        - tuple: New state of the environment, current score, and boolean indicating if simulation is finished.
+        """
         finished = True
 
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
         
         for car in self.cars[:]:
-            # if car can move (not arrived at destination)
-            """
-            Check all car nodes
-            current could be none if on edge
-            previous is origina / last node
-            next is next node unless you have finished
-
-            if on edge, 
-            """
             if car.finished:
                 print(f'car {car.id} has finished')
                 reward = car.calculate_reward()
