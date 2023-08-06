@@ -177,11 +177,9 @@ class Car:
 
         if self.path:
             self.current = None
-            #self.next = self.path[0]
             self.road = self.map.adjacency[self.previous, self.next]
         else:
-            self.current = self.current
-            #self.next = None
+
             self.road = None
             self.on_edge = False
             self.finished = True
@@ -247,7 +245,12 @@ class Car:
             if queue and len(queue) > 0:
                 queue.append(self)
 
-                self.update_navigation_on_join_queue()
+                self.current = self.next
+
+                if len(self.path) > 1:
+                    self.next = self.path[1]
+                else:
+                    self.next = None
 
                 # if car join queue, car no longer on edge
                 self.on_edge = False
