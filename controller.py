@@ -55,10 +55,6 @@ class Controller:
         # Use phase_number to generate the key for the phase
         phase_key = "phase_" + str(phase_number)
         
-        # if number of intersection == 1 or phase_number == 0, skip:
-        # if self.map.intersections[node_number] == 1 or phase_number == 0:
-        #     return
-
         # Get the appropriate phase dictionary
         phases = self.get_phase(self.map.intersections[node_number])
         
@@ -70,14 +66,6 @@ class Controller:
         phase = phases[phase_key]
         
         keys = 'ABCD'
-
-        # for i in keys[0:self.map.intersections[node_number]]:
-        #     for j in keys[0:self.map.intersections[node_number]]:
-        #         if i != j:
-        #             print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
-        #             self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state = phase[str(i)][str(j)]
-        #             print('move')
-        #             print(self.map.traffic_light_instances[node_number][edge_label[str(i)]][edge_label[str(j)]].state)
 
         for i in keys[0:self.map.intersections[node_number]]:
             for j in keys[0:self.map.intersections[node_number]]:
