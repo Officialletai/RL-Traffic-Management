@@ -6,6 +6,25 @@ from light import Light
 
 class Node:
     def __init__(self, label, connections):
+        """
+        Initialize a Node instance.
+        
+        Args:
+        - label (str/int): A unique identifier for the node.
+        - connections (list): List of connections (edges) the node has.
+        - phases_data (dict, optional): Preloaded phase data. If not provided, the class will attempt 
+                                        to read from the file.
+
+        Attributes:
+        - degree (int): Degree of the node based on non-zero connections.
+        - traffic_lights (dict): Dictionary holding the traffic light configuration for this node.
+        - queues (dict): Holds the queues for each connection.
+        - pointers (dict): Tracks the front of the queues.
+        - edge_labels (dict): Dictionary mapping connections to labels 'A', 'B', etc.
+        - phases (list): List of traffic light phases for the node.
+        - phase_numbers (list): List of phase numbers corresponding to the phases.
+        - phase (int): Current phase of the node.
+        """
         self.label = label
         self.connections = connections
         self.degree = np.count_nonzero(connections)
@@ -31,18 +50,10 @@ class Node:
 
         else:
             # if terminal node / degree == 1: create incoming and outgoing queue respectively
-            queues = {}
-            queues['A'] = []
-            queues['B'] = []
-            self.queues = queues
-            
-            self.traffic_lights['A'] = {'B': Light(0)}
-            self.traffic_lights['B'] = {'A': Light(0)}
-            
-            index_of_connected_node = int(np.nonzero(self.connections)[0])
-
+            self.queues = {'A': [], 'B': []}
+            self.traffic_lights = {'A': {'B': Light(0)}, 'B': {'A': Light(0)}}
+            index_of_connected_node = next((i for i, val in enumerate(self.connections) if val), 0)
             self.edge_labels = {self.label: 'A', str(index_of_connected_node) : 'B'}
-
             self.phase = 0
 
     def get_edge_labels(self):
