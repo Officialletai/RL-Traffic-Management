@@ -12,6 +12,7 @@ def print_current_state(simulation):
     print('edge matrix \n', edge_matrix)
     print('traffic light matrix \n', traffic_light_matrix)
 
+print(simulation.get_local_state(4)) #testing local state, need to fix logic
 
 def random_actions(simulation):
     actions = []

@@ -75,7 +75,6 @@ class Car:
 
         return total_time_weights - self.time
         #print('total time weights,', total_time_weights, 'self.time,', self.time)
-    
 
     def initialise_on_queue(self) -> int:
         """

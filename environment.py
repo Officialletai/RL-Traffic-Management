@@ -92,9 +92,9 @@ class Environment:
         node = self.map.nodes[str(agent_node)]
 
         # Initialise separate empty state spaces
-        local_queue_matrix = np.zeros(node.degree, node.degree)
-        local_edge_vector = np.zeros(1, node.degree)
-        local_traffic_light_phase = np.zeros(1, node.degree*(node.degree-1))
+        local_queue_matrix = np.zeros((node.degree, node.degree))
+        local_edge_vector = np.zeros((1, node.degree))
+        local_traffic_light_phase = np.zeros((1, node.degree*(node.degree-1)))
 
         for car in self.cars:
             # If a car is at its destination, no longer include it in the state
@@ -105,23 +105,24 @@ class Environment:
             label_previous = node.edge_labels.get(str(car.previous))
             label_next = node.edge_labels.get(str(car.next))
 
-            # Convert to A,B,C,D to 0,1,2,3 for matrix index
-            previous_pos = ord(label_previous) - ord('A')
-            next_pos = ord(label_next) - ord('A')
-            
+            # If the label exists, add to edge vector
+            if label_previous:
+                # Convert to A,B,C,D to 0,1,2,3 for matrix index
+                previous_pos = ord(label_previous) - ord('A')
+                next_pos = ord(label_next) - ord('A')
+
             # If the car is on an edge and it is coming towards the node
             if car.on_edge == True and car.current == agent_node:
-                # If the label exists, add to edge vector
-                if label_previous:
-                    local_edge_vector[previous_pos] += 1
+                # Add to appropriate position in edge vector
+                local_edge_vector[previous_pos] += 1
 
-            # Else the car must be in a queue, add to appropriate position in queue matrix
+            # Else the car must be in a queue, so add to appropriate position in queue matrix
             else:
                 local_queue_matrix[previous_pos, next_pos] += 1
 
         # Get the traffic light phases in 1s and 0s
         #
-        local_traffic_light_phase = []
+        local_traffic_light_phase = [1]
         #
         #
 
@@ -153,7 +154,8 @@ class Environment:
             """
             if car.finished:
                 print(f'car {car.id} has finished')
-                self.score += car.reward
+                reward = car.calculate_reward()
+                self.score += reward
                 self.cars.remove(car)
                 continue
             else:
