@@ -282,6 +282,7 @@ class Car:
                 # if car join queue, car no longer on edge
                 self.on_edge = False
 
+                self.map.nodes[str(self.current)].update_pointers()
                 
             # if queue is empty or does not exist we go to the next road
             else:
@@ -297,8 +298,14 @@ class Car:
         elif self.road_progress >= 100 and not light_green:
             queue.append(self)
             self.current = self.next
+            if len(self.path) > 1:
+                self.next = self.path[1]
+            else:
+                self.next = None
             # if car join queue, car no longer on edge
             self.on_edge = False
+
+            self.map.nodes[str(self.current)].update_pointers()
 
         # no matter what, we increment time by one unit
         self.time += 1

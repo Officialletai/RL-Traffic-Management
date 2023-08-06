@@ -20,7 +20,7 @@ def random_actions(simulation):
         intersections = simulation.map.intersections[i]
         possible_moves = len(simulation.controller.get_phase(intersections))
         #print(possible_moves)
-        random_move = np.random.choice(range(1, possible_moves))
+        random_move = np.random.choice(range(1, possible_moves + 1))
         actions.append((i, random_move))
     
     print(actions)
@@ -31,12 +31,14 @@ for node, action in random_actions(simulation):
 
 print_current_state(simulation)
 
-# finished = False
+finished = False
 
-# while not finished:
-#     random_action = random_actions(simulation)
-#     state, score, finished = simulation.step(random_action)
-
-for i in range(50):
+while not finished:
     random_action = random_actions(simulation)
     state, score, finished = simulation.step(random_action)
+
+print_current_state(simulation)
+print(state, score, finished)
+# for i in range(50):
+#     random_action = random_actions(simulation)
+#     state, score, finished = simulation.step(random_action)
