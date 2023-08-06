@@ -7,6 +7,10 @@ from edge import Edge
 
 from map import Map
 
+MAX_PROGRESS = 100
+# * 100 = percentage -> / 60 = minutes -> / 60 = seconds
+DEFAULT_SPEED_MULTIPLIER = (100 / 60) / 60
+
 class Car:
     def __init__(self, car_id: int, map_: Map, origin: int, destination: int, time: int = 0):
         """
@@ -47,15 +51,6 @@ class Car:
         self.on_edge = False # True
         self.finished = False #bool(self.current == self.destination)
         self.speed = 0
-
-    def get_location(self):
-        """
-        Get the car's previous location.
-        
-        Returns:
-            tuple: The previous node, the destination and the car's progress along the road to the current node.
-        """
-        return self.previous, self.current, self.next, self.road_progress
     
     def calculate_reward(self):
         """
@@ -131,14 +126,6 @@ class Car:
 
             return queue
     
-            # # node = previous node / from 
-            # node = self.map.nodes[f'{self.previous}']
-            # # get edge label of current node 
-            # mapping = node.edge_labels
-            # # get translation of next node -> a/b/c/d
-            # translation = list(mapping.keys())[list(mapping.values()).index(self.current)]
-            # return node.queues[translation]
-    
     def random_next_edge(self):
         current_node = self.map.nodes[str(self.current)]
         current_edge_label = current_node.edge_labels[str(self.previous)]
@@ -188,7 +175,6 @@ class Car:
         if self.path_cost:
             self.path_cost.pop(0)
 
-        #######
         if self.path:
             self.current = None
             #self.next = self.path[0]
@@ -199,17 +185,6 @@ class Car:
             self.road = None
             self.on_edge = False
             self.finished = True
-        #######
-
-        # if self.path:
-        #     self.current = self.path[1] if len(self.path) > 1 else None
-        #     self.next = self.path[2] if len(self.path) > 2 else None
-        #     self.road = self.map.adjacency[self.path[0], self.path[1]] if len(self.path) > 1 else None
-        # else:
-        #     self.current = None
-        #     self.next = None
-        #     self.road = None
-
 
     def move(self, light_green: bool):
         """
@@ -223,7 +198,7 @@ class Car:
 
         # Compute the car's speed based on the previous road's weight (cost)
         if self.path_cost:
-            speed = (1 / self.path_cost[0]) * 20
+            speed = (1 / self.path_cost[0]) * DEFAULT_SPEED_MULTIPLIER
             self.speed = speed
         else:
             speed = self.speed
@@ -249,12 +224,12 @@ class Car:
                 return
 
         # Move the car along the previous road at the computed speed
-        if self.road_progress < 100:
+        if self.road_progress < MAX_PROGRESS:
             self.road_progress += speed
 
         # Ensure road progress does not exceed 100
-        if self.road_progress > 100:  
-            self.road_progress = 100
+        if self.road_progress > MAX_PROGRESS:  
+            self.road_progress = MAX_PROGRESS
 
         if self.next == self.destination and self.road_progress == 100:
             self.finished = True
@@ -262,7 +237,7 @@ class Car:
             return
 
         # If the car has reached the end of the road and the light is green
-        if self.road_progress >= 100 and light_green:
+        if self.road_progress >= MAX_PROGRESS and light_green:
 
             # if there exists a queue, join queue, otherwise pass through
             # queue = queue if exists, otherwise returns None 
@@ -272,12 +247,7 @@ class Car:
             if queue and len(queue) > 0:
                 queue.append(self)
 
-                self.current = self.next
-                
-                if len(self.path) > 1:
-                    self.next = self.path[1]
-                else:
-                    self.next = None
+                self.update_navigation_on_join_queue()
 
                 # if car join queue, car no longer on edge
                 self.on_edge = False
@@ -295,9 +265,10 @@ class Car:
 
 
         # if traffic light is red and we are at end of road, we must join the correct queue
-        elif self.road_progress >= 100 and not light_green:
+        elif self.road_progress >= MAX_PROGRESS and not light_green:
             queue.append(self)
             self.current = self.next
+
             if len(self.path) > 1:
                 self.next = self.path[1]
             else:

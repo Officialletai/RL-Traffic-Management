@@ -37,8 +37,4 @@ while not finished:
     random_action = random_actions(simulation)
     state, score, finished = simulation.step(random_action)
 
-print_current_state(simulation)
 print(state, score, finished)
-# for i in range(50):
-#     random_action = random_actions(simulation)
-#     state, score, finished = simulation.step(random_action)

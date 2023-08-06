@@ -5,12 +5,8 @@ from map import Map
 class Controller:
     def __init__ (self, map_=Map):
     # def __init__ (self):
-        # we use -1 as the stopping move to end the turn
         self.map = map_
         self.node_move_set = [i for i in range(self.map.num_nodes)]
-        # self.node_move_set.append(-1)
-        # self.move_set = self.get_phase()
-
 
         # Load move sets from files
         with open('phases/node_degree_4_phases.json', 'r') as file:
@@ -73,8 +69,6 @@ class Controller:
         # Get the specific phase
         phase = phases[phase_key]
         
-        # edge_label = self.map.nodes[str(node_number)].edge_labels
-
         keys = 'ABCD'
 
         # for i in keys[0:self.map.intersections[node_number]]:
