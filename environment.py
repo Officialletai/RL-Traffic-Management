@@ -108,8 +108,7 @@ class Environment:
             """
             if car.finished:
                 print(f'car {car.id} has finished')
-                reward = car.calculate_reward()
-                self.score += reward
+                self.score += car.reward
                 self.cars.remove(car)
                 continue
             else:
