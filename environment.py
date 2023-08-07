@@ -126,7 +126,10 @@ class Environment:
         # Initialise separate empty state spaces
         local_queue_matrix = np.zeros((node.degree, node.degree))
         local_edge_vector = np.zeros(node.degree)
-        local_traffic_lights = np.zeros((node.degree, node.degree))
+        if node.degree == 1:
+            local_traffic_lights = np.zeros((node.degree+1, node.degree+1))
+        else:
+            local_traffic_lights = np.zeros((node.degree, node.degree))
 
         for car in self.cars:
             # If a car is at its destination, no longer include it in the state
