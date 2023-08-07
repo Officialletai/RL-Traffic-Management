@@ -24,6 +24,7 @@ class Environment:
 
         self.time = 0
         self.score = 0
+        self.reward_array = np.zeros(self.map.num_nodes)
 
 
     def initialise_cars(self, num_cars):
@@ -95,7 +96,6 @@ class Environment:
             # if the car is on the edge, we can add it to the edge matrix
             # otherwise add it to the queue matrix
             if car.on_edge == True:
-                print('car id:', car.id, 'car previous:', car.previous, 'car next:', car.next)
                 edge_matrix[car.previous][car.next] += 1
             else:
                 queue_matrix[car.current][car.next] += 1
@@ -229,20 +229,14 @@ class Environment:
             current_node = car.current
             previous_node = car.previous
             next_node = car.next
-
-            print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress)
-            
             # if car is not edge, it must be in queue
             # if car is on road and has more intersections to get through, check them
             # if no more intersections after the coming node, it is moving towards destination
             # it will just join any queue and end there.
             if car.on_edge:
                 
-                
                 current_node_labels = self.map.nodes[str(next_node)].edge_labels
-                
-                print('previous node ', previous_node, 'current node labels, ', current_node_labels)
-                
+                                
                 previous_node_label = current_node_labels[str(previous_node)]
 
                 # if there are more nodes to go through, check the next next node
@@ -263,6 +257,7 @@ class Environment:
                 # car.move(traffic light color)
                 car.move(traffic_light_state)
             else:
+                self.reward_array[car.current] += -1
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
                 # traffic_light_state = traffic_light.state
@@ -293,8 +288,9 @@ class Environment:
 
             print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
+        self.time += 1
 
-        return self.get_state(), self.score, finished
+        return self.get_state(), self.reward_array, finished, self.time
 
 
 if __name__ =='__main__':
