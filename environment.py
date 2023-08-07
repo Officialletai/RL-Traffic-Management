@@ -291,6 +291,7 @@ class Environment:
 
             print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
+        self.reward_array = np.zeros(self.map.num_nodes)
         self.time += 1
 
         return self.get_state(), self.reward_array, finished, self.time
