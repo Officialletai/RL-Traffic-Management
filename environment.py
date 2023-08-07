@@ -197,7 +197,7 @@ class Environment:
         n_local_edge_vector = np.where(mask, local_edge_vector / local_edge_norm, local_edge_vector)
         
         # Create the state by combining and flattening all observations together into one array
-        state= [n_local_queue_matrix.flatten(), n_local_edge_vector.flatten(), local_traffic_lights.flatten()]
+        state= np.concatenate([n_local_queue_matrix.flatten(), n_local_edge_vector.flatten(), local_traffic_lights.flatten()])
 
         return state
     

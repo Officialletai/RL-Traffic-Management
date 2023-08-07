@@ -30,6 +30,7 @@ class Car:
         self.destination = destination
         
         self.path = self.path_finder()
+        self.time_path = []
         self.path_cost = self.get_path_weights()
         
         self.current = self.path[0] if self.path else None
@@ -75,6 +76,10 @@ class Car:
 
         return total_time_weights - self.time
         #print('total time weights,', total_time_weights, 'self.time,', self.time)
+    
+    def get_path_reward(self):
+
+        pass
 
     def initialise_on_queue(self) -> int:
         """
@@ -230,7 +235,7 @@ class Car:
         if self.on_edge == False:
             if self.if_front_of_queue() and light_green == True:
                 queue.remove(self)
-                
+                self.time_path.append(self.time)
                 current_node = self.map.nodes[str(self.current)]
                 current_node.update_pointers()
                 self.update_navigation()
@@ -240,11 +245,12 @@ class Car:
 
         # Move the car along the previous road at the computed speed
         # Ensure road progress does not exceed 100
-        self.road_progress = min(self.road_progress + speed, MAX_PROGRESS)
+        self.road_progress = min(self.road_progress + self.speed, MAX_PROGRESS)
         
         if self.next == self.destination and self.road_progress == 100:
             self.finished = True
             self.time += 1
+            self.time_path.append(self.time)
             return
 
         # If the car has reached the end of the road and the light is green
