@@ -12,8 +12,6 @@ def print_current_state(simulation):
     print('edge matrix \n', edge_matrix)
     print('traffic light matrix \n', traffic_light_matrix)
 
-print(simulation.get_local_state(4)) #testing local state, need to fix logic
-
 def random_actions(simulation):
     actions = []
 
@@ -37,5 +35,6 @@ finished = False
 while not finished:
     random_action = random_actions(simulation)
     state, score, finished = simulation.step(random_action)
+    print("node 4 state", simulation.get_local_state(6))
 
 print(state, score, finished)

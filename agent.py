@@ -15,6 +15,7 @@ class DQN(nn.Module):
         x = torch.relu(self.fc1(state))
         return self.fc2(x)
 
+# There will be as many agent as there are nodes
 class NodeAgent:
     def __init__(self, input_size, output_size):
 

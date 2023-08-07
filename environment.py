@@ -132,24 +132,33 @@ class Environment:
             if car.finished == True:
                 continue
 
-            # In local terms, aka in A B C D, get the data of the car
-            label_previous = node.edge_labels.get(str(car.previous))
-            label_next = node.edge_labels.get(str(car.next))
-
-            # If the label exists, add to edge vector
-            if label_previous:
-                # Convert to A,B,C,D to 0,1,2,3 for matrix index
-                previous_pos = ord(label_previous) - ord('A')
-                next_pos = ord(label_next) - ord('A')
-
             # If the car is on an edge and it is coming towards the node
             if car.on_edge == True and car.current == agent_node:
-                # Add to appropriate position in edge vector
-                local_edge_vector[previous_pos] += 1
+                # In local terms, aka in A B C D, get the data of the car
+                label_previous = node.edge_labels.get(str(car.previous))
 
-            # Else the car must be in a queue, so add to appropriate position in queue matrix
+                # If the label exists
+                if label_previous:
+                    # Convert to A,B,C,D to 0,1,2,3 for matrix index
+                    previous_pos = ord(label_previous) - ord('A')
+
+                    # Add to appropriate position in edge vector
+                    local_edge_vector[previous_pos] += 1
+
+            # Else the car must be in a queue
             else:
-                local_queue_matrix[previous_pos, next_pos] += 1
+                # In local terms, aka in A B C D, get the data of the car
+                label_previous = node.edge_labels.get(str(car.previous))
+                label_next = node.edge_labels.get(str(car.next))
+
+                # If the label exists, add to edge vector
+                if label_previous and label_next:
+                    # Convert to A,B,C,D to 0,1,2,3 for matrix index
+                    previous_pos = ord(label_previous) - ord('A')
+                    next_pos = ord(label_next) - ord('A')
+
+                    # Add to appropriate position in queue matrix
+                    local_queue_matrix[previous_pos, next_pos] += 1
 
         # Get the traffic light phases in 1s and 0s
         #
@@ -159,10 +168,10 @@ class Environment:
 
         # Normalise the state observations
         n_local_queue_matrix = local_queue_matrix / np.linalg.norm(local_queue_matrix, axis=1, keepdims=True)
-        n_local_queue_matrix = local_queue_matrix / np.linalg.norm(local_queue_matrix, axis=1, keepdims=True)
+        n_local_edge_vector = local_edge_vector / np.linalg.norm(local_edge_vector, axis=1, keepdims=True)
         
         # Create the state by combining and flattening all observations together into one array
-        state= [n_local_queue_matrix.flatten(), n_local_queue_matrix.flatten(),local_traffic_light_phase]
+        state= [n_local_queue_matrix.flatten(), n_local_edge_vector.flatten(),local_traffic_light_phase]
 
         return state
     
