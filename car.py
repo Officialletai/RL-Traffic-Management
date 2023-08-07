@@ -240,7 +240,7 @@ class Car:
 
         # Move the car along the previous road at the computed speed
         # Ensure road progress does not exceed 100
-        self.road_progress = min(self.road_progress + self.speed, MAX_PROGRESS)
+        self.road_progress = min(self.road_progress + speed, MAX_PROGRESS)
         
         if self.next == self.destination and self.road_progress == 100:
             self.finished = True
