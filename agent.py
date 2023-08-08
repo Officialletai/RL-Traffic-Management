@@ -43,21 +43,22 @@ class NodeAgent:
     def train(self, state, action, reward, next_state, done):
         state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         next_state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0)
-        action = torch.tensor(action, dtype=torch.float32).unsqueeze(0)
+        action = torch.tensor(action, dtype=torch.long).unsqueeze(0)
         reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0)
         done = torch.tensor(int(done), dtype=torch.float32).unsqueeze(0)
 
         # Compute Q(s, a)
-        all_current_q_values = self.model(state)
-        current_q_value = all_current_q_values[0, action]
+        current_q_values = self.model(state)
+        current_q_value = current_q_values.max(1)[0]
 
         # Compute Q(s', a')
         with torch.no_grad():
-            next_q_value = self.model(next_state)
+            next_q_values = self.model(next_state)
+            next_q_value = next_q_values.max(1)[0]
 
-        target = reward + (1 - done) * self.discount_factor * torch.max(next_q_value)
+        target = reward + (1 - done) * self.discount_factor * next_q_value
 
-        loss = F.mse_loss(current_q_value.unsqueeze(0), target)
+        loss = F.mse_loss(current_q_value, target)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -103,7 +104,7 @@ class MultiAgent:
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
 
-def train_multi_agent(episodes=10):
+def train_multi_agent(episodes=100):
     env = Environment()
     multi_agent = MultiAgent(env)
     times = []
@@ -128,7 +129,7 @@ def train_multi_agent(episodes=10):
         
         times.append(env.time)
 
-        if episode % 2== 0 and episode != 0:
+        if episode % 25 == 0 and episode != 0:
             print(
                 f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}"
             ) 
