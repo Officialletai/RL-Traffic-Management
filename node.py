@@ -21,7 +21,6 @@ class Node:
         - queues (dict): Holds the queues for each connection.
         - pointers (dict): Tracks the front of the queues.
         - edge_labels (dict): Dictionary mapping connections to labels 'A', 'B', etc.
-        - phases (list): List of possible traffic light phases for the node.
         - phase (int): Current phase of the node.
         """
         self.label = label
@@ -39,10 +38,10 @@ class Node:
         if self.degree > 1:
             filename = f'phases/node_degree_{self.degree}_phases.json'
             with open(filename, "r") as file:
-                self.phases = json.load(file)
+                phases = json.load(file)
 
             # Store the phase numbers (i.e. 1,2,3....)
-            phase_numbers = [i+1 for i in range(len(self.phases))]
+            phase_numbers = [i+1 for i in range(len(phases))]
 
             # Pick a random phase to initialise the node
             self.phase = random.choice(phase_numbers)

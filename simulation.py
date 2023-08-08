@@ -34,6 +34,6 @@ finished = False
 
 while not finished:
     random_action = random_actions(simulation)
-    state, score, finished, time = simulation.step(random_action)
+    state, score, finished = simulation.step(random_action)
 
-print(state, score, finished, time)
+print(state, score, finished)
