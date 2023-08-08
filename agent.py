@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
+import itertools
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -47,15 +48,16 @@ class NodeAgent:
         done = torch.tensor(int(done), dtype=torch.float32).unsqueeze(0)
 
         # Compute Q(s, a)
-        current_q_value = self.model(state)
+        all_current_q_values = self.model(state)
+        current_q_value = all_current_q_values[0, action]
 
         # Compute Q(s', a')
         with torch.no_grad():
             next_q_value = self.model(next_state)
 
-        target = reward + (1 - done) * self.discount_factor * next_q_value
+        target = reward + (1 - done) * self.discount_factor * torch.max(next_q_value)
 
-        loss = F.mse_loss(current_q_value, target)
+        loss = F.mse_loss(current_q_value.unsqueeze(0), target)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -101,7 +103,7 @@ class MultiAgent:
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
 
-def train_multi_agent(episodes=3000):
+def train_multi_agent(episodes=10):
     env = Environment()
     multi_agent = MultiAgent(env)
     times = []
@@ -126,16 +128,35 @@ def train_multi_agent(episodes=3000):
         
         times.append(env.time)
 
-        if episode % 2 == 0 and episode != 0:
+        if episode % 2== 0 and episode != 0:
             print(
                 f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}"
             ) 
 
             times = []
-        
+    
+    return times
 
 if __name__ == "__main__":
-    train_multi_agent()
+
+    # Define potential values for hyperparameters
+    discount_factors = [0.9, 0.95, 0.99, 0.995]
+    learning_rates = [0.001, 0.002, 0.005, 0.01]
+    epsilon_decay_rates = [0.995, 0.9975, 0.999, 0.99975]
+
+    # Create a list of all combinations of hyperparameters
+    hyperparameters = list(itertools.product(discount_factors, learning_rates, epsilon_decay_rates))
+
+    # Loop over each combination of hyperparameters and train your model
+    for discount_factor, learning_rate, epsilon_decay_rate in hyperparameters:
+        print(f"Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
+    
+        # Update the values in your code
+        NodeAgent.discount_factor = discount_factor
+        NodeAgent.learning_rate = learning_rate
+        MultiAgent.epsilon_decay_rate = epsilon_decay_rate
+
+        train_multi_agent()
 
 
         
