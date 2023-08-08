@@ -9,7 +9,7 @@ from map import Map
 
 # Constants
 MAX_PROGRESS = 100
-DEFAULT_SPEED_MULTIPLIER = (100 / 60) / 60 # Conversion to seconds from 100 percent
+DEFAULT_SPEED_MULTIPLIER = (100 / 60) * 5# Conversion to seconds from 100 percent
 
 class Car:
     def __init__(self, car_id: int, map_: Map, origin: int, destination: int, time: int = 0):
@@ -335,7 +335,10 @@ class Car:
             edge = self.map.adjacency[node1][node2]
             
             # Add the edge weight to the list
-            path_weights.append((edge.weight[0]))
+            if hasattr(edge.weight, "__len__"):
+                path_weights.append((edge.weight[0]))
+            else:
+                path_weights.append((edge.weight))
             
         return path_weights
 

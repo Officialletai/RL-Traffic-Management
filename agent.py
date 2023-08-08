@@ -19,11 +19,12 @@ class DQN(nn.Module):
 
 # There will be as many agent as there are nodes
 class NodeAgent:
-    def __init__(self, input_size, output_size, node_number):
+    def __init__(self, input_size, output_size, node_number, epsilon):
 
         # Hyperparameters
         self.discount_factor = 0.995
-        self.learning_rate = 0.05
+        self.learning_rate = 0.001
+        self.epsilon = epsilon
         
         self.environment = Environment()
         self.model = DQN(input_size,output_size)
@@ -39,7 +40,12 @@ class NodeAgent:
             return action
 
     def train(self, state, action, reward, next_state, done):
-        
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
+        next_state = torch.tensor(next_state, dtype=torch.float32).unsqueeze(0)
+        action = torch.tensor(action, dtype=torch.float32).unsqueeze(0)
+        reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0)
+        done = torch.tensor(int(done), dtype=torch.float32).unsqueeze(0)
+
         # Compute Q(s, a)
         current_q_value = self.model(state)
 
@@ -57,28 +63,49 @@ class NodeAgent:
 
 
 class MultiAgent:
-    def __init__(self, local_states, rewards):
+    def __init__(self, environment):
         self.epsilon = 1.0
-        self.epsilon_min = 0.001
-        self.epsilon_decay_rate = 0.999
-        self.max_epochs = 10000
+        self.epsilon_min = 0.0001
+        self.epsilon_decay_rate = 0.99975
 
+        self.environment = environment
+        self.num_nodes = self.environment.map.num_nodes
         self.agents = {}
 
-    
-    def get_actions(self):
-        actions = []
+        for node in range(self.num_nodes):
+            degree = self.environment.map.nodes[str(node)].degree
+            input_dimension = (2*(degree*degree))+degree #queue, traffic light, edge
+            output_dimension = len(self.environment.controller.get_phase(degree))
+            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.epsilon)
 
-    
-    def update_agents(self):
-        pass
+    def get_actions(self, local_states):
+        actions = {}
+
+        for node in self.agents:
+            local_state = local_states[node]
+            action = self.agents[node].pick_action(local_state)
+            actions[node] = action
+        
+        return actions 
+        
+    def update_agents(self, local_states, actions, rewards, next_local_states, finished, episode):
+        for node in self.agents:
+            local_state = local_states[node]
+            action = actions[node]
+            reward = rewards[node]
+            next_local_state = next_local_states[node]
+            if self.environment.map.intersections[self.agents[node].node_number] == 1:
+                continue
+            self.agents[node].train(local_state, action, reward, next_local_state, finished)
+        
+        self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
 
-
-def train_multi_agent(episodes=1000):
+def train_multi_agent(episodes=3000):
     env = Environment()
-    multi_agent = MultiAgent()
-
+    multi_agent = MultiAgent(env)
+    times = []
+    
     for episode in range(episodes):
         env.reset()
         
@@ -87,12 +114,28 @@ def train_multi_agent(episodes=1000):
         finished = False
 
         while not finished:
-            actions = multi_agent.get_actions()
-            next_local_states, rewards, finished = env.step(actions)
+            actions = multi_agent.get_actions(local_states)
+            # current dictionary:
+            # {1: 1, 2:3, 3:1, 4:6}
+            # actions -> [(1,1), (2,4), (3,2)]
+            actions_array = list(actions.items())
+            next_local_states, rewards, finished = env.step(actions_array)
 
             multi_agent.update_agents(local_states, actions, rewards, next_local_states, finished, episode)
             local_states = next_local_states
-    
+        
+        times.append(env.time)
+
+        if episode % 2 == 0 and episode != 0:
+            print(
+                f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}"
+            ) 
+
+            times = []
+        
+
+if __name__ == "__main__":
+    train_multi_agent()
 
 
         
