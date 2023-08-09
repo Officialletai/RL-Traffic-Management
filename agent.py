@@ -108,6 +108,7 @@ def train_multi_agent(episodes=100):
     env = Environment()
     multi_agent = MultiAgent(env)
     times = []
+    average_car_wait_time = []
     
     for episode in range(episodes):
         env.reset()
@@ -129,9 +130,12 @@ def train_multi_agent(episodes=100):
         
         times.append(env.time)
 
-        if episode % 25 == 0 and episode != 0:
+        avg_time = sum(env.time_in_traffic.values()) / len(env.time_in_traffic)
+        average_car_wait_time.append(avg_time)
+
+        if episode % 2 == 0 and episode != 0:
             print(
-                f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}"
+                f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}, Average Car Wait Time: {np.mean(average_car_wait_time)}"
             ) 
 
             times = []

@@ -19,13 +19,16 @@ class Environment:
         - score (int): Evaluation metric, quantifies how well cars navigate the environment.
         """
         self.map = Map()
-        self.cars = self.initialise_cars(num_cars=10)
+
+        self.num_cars = 10
+        self.cars = self.initialise_cars(self.num_cars)
         self.controller = Controller(self.map)
 
         self.time = 0
         self.score = 0
         self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}
         self.local_states = {}
+        self.time_in_traffic = {car_number:0 for car_number in range(self.num_cars)}
 
 
     def initialise_cars(self, num_cars):
@@ -68,10 +71,11 @@ class Environment:
         self.cars = self.initialise_cars(num_cars=10)
         self.controller = Controller(self.map)
 
+        self.num_cars = 10
         self.time = 0
         self.score = 0
         self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}
-
+        self.time_in_traffic = {car_number:0 for car_number in range(self.num_cars)}
 
     def get_state(self):
         """
@@ -236,6 +240,7 @@ class Environment:
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
         
+        car_count = 0
         for car in self.cars[:]:
             if car.finished:
                 #print(f'car {car.id} has finished')
@@ -280,6 +285,7 @@ class Environment:
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
                 # traffic_light_state = traffic_light.state
+                self.time_in_traffic[car_count] += 1
 
                
                 current_node_labels = self.map.nodes[str(current_node)].edge_labels
@@ -305,6 +311,8 @@ class Environment:
                 # car.move(traffic light color)
                 car.move(traffic_light_state)
 
+            car_count += 1
+
             #print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
         self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}
@@ -313,7 +321,6 @@ class Environment:
         self.time += 1
 
         return self.get_local_state(), self.reward_array, finished
-
 
 if __name__ =='__main__':
     test = Environment()
