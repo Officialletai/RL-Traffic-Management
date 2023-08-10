@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import itertools
+import os
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -64,6 +65,12 @@ class NodeAgent:
         loss.backward()
         self.optimizer.step()
 
+    def save_model(self, path):
+        torch.save(self.model.state_dict(), path)
+        print("saved model")
+
+    def load_model(self, path):
+        self.model.load_state_dict(torch.load(path))
 
 class MultiAgent:
     def __init__(self, environment):
@@ -103,6 +110,23 @@ class MultiAgent:
         
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
+    def save_models(self, save_dir):
+        
+        print("almost about to save very close")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        for node, agent in self.agents.items():
+            agent.save_model(f"{save_dir}/agent_{node}.pth")
+
+    def load_models(self, save_dir):
+
+        if not os.path.exists(save_dir):
+            raise ValueError(f"Directory {save_dir} does not exist.")
+        
+        for node, agent in self.agents.items():
+            agent.load_model(f"{save_dir}/agent_{node}.pth")
+
 
 def train_multi_agent(episodes=100):
     env = Environment()
@@ -133,12 +157,13 @@ def train_multi_agent(episodes=100):
         avg_time = sum(env.time_in_traffic.values()) / len(env.time_in_traffic)
         average_car_wait_time.append(avg_time)
 
-        if episode % 2 == 0 and episode != 0:
+        if episode % 25 == 0 and episode != 0:
             print(
                 f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}, Average Car Wait Time: {np.mean(average_car_wait_time)}"
             ) 
 
             times = []
+            multi_agent.save_models("dqn_models")
     
     return times
 

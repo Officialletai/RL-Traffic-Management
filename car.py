@@ -76,10 +76,6 @@ class Car:
 
         return total_time_weights - self.time
         #print('total time weights,', total_time_weights, 'self.time,', self.time)
-    
-    def get_path_reward(self):
-
-        pass
 
     def initialise_on_queue(self) -> int:
         """
