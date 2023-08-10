@@ -18,9 +18,10 @@ class Environment:
         - time (int): Keeps track of the simulation time.
         - score (int): Evaluation metric, quantifies how well cars navigate the environment.
         """
-        self.map = Map()
+        self.num_nodes = 10
+        self.map = Map(num_nodes=self.num_nodes)
 
-        self.num_cars = 10
+        self.num_cars = 1
         self.cars = self.initialise_cars(self.num_cars)
         self.controller = Controller(self.map)
 
@@ -67,11 +68,10 @@ class Environment:
         Returns:
         - tuple: Represents the state of the environment after reset.
         """
-        self.map = Map()
-        self.cars = self.initialise_cars(num_cars=10)
+        self.map = Map(num_nodes=self.num_nodes)
+        self.cars = self.initialise_cars(num_cars=self.num_cars)
         self.controller = Controller(self.map)
 
-        self.num_cars = 10
         self.time = 0
         self.score = 0
         self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}

@@ -49,7 +49,7 @@ class Node:
         else:
             # if terminal node / degree == 1: create incoming and outgoing queue respectively
             self.queues = {'A': [], 'B': []}
-            self.traffic_lights = {'A': {'B': Light(0)}, 'B': {'A': Light(0)}}
+            self.traffic_lights = {'A': {'B': Light()}, 'B': {'A': Light()}}
             index_of_connected_node = next((i for i, val in enumerate(self.connections) if val), 0)
             self.edge_labels = {self.label: 'A', str(index_of_connected_node) : 'B'}
             self.phase = 1
@@ -78,7 +78,7 @@ class Node:
         keys = 'ABCD'[:self.degree]
         traffic_lights = {}
         for key in keys:
-            traffic_lights[key] = {keys[j]: Light(0) for j in range(self.degree) if keys[j]!=key}
+            traffic_lights[key] = {keys[j]: Light() for j in range(self.degree) if keys[j]!=key}
         
         return traffic_lights
     

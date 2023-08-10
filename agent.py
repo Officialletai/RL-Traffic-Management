@@ -67,7 +67,7 @@ class NodeAgent:
 
     def save_model(self, path):
         torch.save(self.model.state_dict(), path)
-        print("saved model")
+        #print("saved model")
 
     def load_model(self, path):
         self.model.load_state_dict(torch.load(path))
@@ -112,7 +112,7 @@ class MultiAgent:
 
     def save_models(self, save_dir):
         
-        print("almost about to save very close")
+        #print("almost about to save very close")
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
@@ -128,7 +128,7 @@ class MultiAgent:
             agent.load_model(f"{save_dir}/agent_{node}.pth")
 
 
-def train_multi_agent(episodes=2500):
+def train_multi_agent(episodes=1250):
     env = Environment()
     multi_agent = MultiAgent(env)
     times = []
@@ -171,9 +171,9 @@ def train_multi_agent(episodes=2500):
 if __name__ == "__main__":
 
     # Define potential values for hyperparameters
-    discount_factors = [0.95, 0.995]
-    learning_rates = [0.001, 0.005]
-    epsilon_decay_rates = [0.9975, 0.99925, 0.99975]
+    discount_factors = [0.9975, 0.9995, 0.999925]
+    learning_rates = [0.00025, 0.0001]
+    epsilon_decay_rates = [0.99975, 0.99995, 0.9999925]
 
     # Create a list of all combinations of hyperparameters
     hyperparameters = list(itertools.product(discount_factors, learning_rates, epsilon_decay_rates))
@@ -190,4 +190,4 @@ if __name__ == "__main__":
         train_multi_agent()
 
 
-        
+ 
