@@ -128,7 +128,7 @@ class MultiAgent:
             agent.load_model(f"{save_dir}/agent_{node}.pth")
 
 
-def train_multi_agent(episodes=100):
+def train_multi_agent(episodes=2500):
     env = Environment()
     multi_agent = MultiAgent(env)
     times = []
@@ -159,9 +159,10 @@ def train_multi_agent(episodes=100):
 
         if episode % 25 == 0 and episode != 0:
             print(
-                f"Epochs: {episode}, average_time: {np.mean(times)}, highest_score: {np.amin(times)}, epsilon_value: {multi_agent.epsilon}, Average Car Wait Time: {np.mean(average_car_wait_time)}"
+                f"Epochs: {episode}, average_car_wait_time: {np.mean(average_car_wait_time)}, lowest_car_wait_time: {np.amin(average_car_wait_time)}, epsilon_value: {multi_agent.epsilon}"
             ) 
 
+            average_car_wait_time = []
             times = []
             multi_agent.save_models("dqn_models")
     
@@ -170,9 +171,9 @@ def train_multi_agent(episodes=100):
 if __name__ == "__main__":
 
     # Define potential values for hyperparameters
-    discount_factors = [0.9, 0.95, 0.99, 0.995]
-    learning_rates = [0.001, 0.002, 0.005, 0.01]
-    epsilon_decay_rates = [0.995, 0.9975, 0.999, 0.99975]
+    discount_factors = [0.95, 0.995]
+    learning_rates = [0.001, 0.005]
+    epsilon_decay_rates = [0.9975, 0.99925, 0.99975]
 
     # Create a list of all combinations of hyperparameters
     hyperparameters = list(itertools.product(discount_factors, learning_rates, epsilon_decay_rates))
