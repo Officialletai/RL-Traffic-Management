@@ -7,7 +7,7 @@ import random
 
 
 class Environment:
-    def __init__(self):
+    def __init__(self, num_nodes=10, num_cars=10):
         """
         Initializes the environment.
         
@@ -18,10 +18,10 @@ class Environment:
         - time (int): Keeps track of the simulation time.
         - score (int): Evaluation metric, quantifies how well cars navigate the environment.
         """
-        self.num_nodes = 10
+        self.num_nodes = num_nodes
         self.map = Map(num_nodes=self.num_nodes)
 
-        self.num_cars = 1
+        self.num_cars = num_cars
         self.cars = self.initialise_cars(self.num_cars)
         self.controller = Controller(self.map)
 
@@ -31,6 +31,7 @@ class Environment:
         self.local_states = {}
         self.time_in_traffic = {car_number:0 for car_number in range(self.num_cars)}
 
+        self.all_car_journeys = {str(car): [] for car in range(self.num_cars)}
 
     def initialise_cars(self, num_cars):
         """
@@ -259,6 +260,11 @@ class Environment:
             # it will just join any queue and end there.
             if car.on_edge:
                 
+                # As soon as the car enters its first edge, it has officially set off. It remains True for the rest of the journey
+                car.set_off = True
+
+                self.all_car_journeys[str(car.id)].append([(int(previous_node), int(next_node)), car.road_progress/100])
+
                 current_node_labels = self.map.nodes[str(next_node)].edge_labels
                                 
                 previous_node_label = current_node_labels[str(previous_node)]
@@ -281,6 +287,15 @@ class Environment:
                 # car.move(traffic light color)
                 car.move(traffic_light_state)
             else:
+                if car.set_off:
+                    # When car has set off, when at a node queue, it is 100% of the way between previous and current nodes 
+                    self.all_car_journeys[str(car.id)].append([(int(previous_node), int(current_node)), car.road_progress/100]) # current, next
+                else:
+                    # If it is still stuck at the origin node, given that we initialise cars on queues by giving them a random
+                    # pseudo-previous_node, we can't use previous node until the car has set off as otherwise in the animation it will
+                    # appear to be jumping to a random adjacent node at the very start of the replay
+                    self.all_car_journeys[str(car.id)].append([(int(current_node), int(next_node)), car.road_progress/100]) # current, next
+
                 self.reward_array[car.current] += -1
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
@@ -312,7 +327,7 @@ class Environment:
                 car.move(traffic_light_state)
 
             car_count += 1
-
+            
             #print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
         self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}

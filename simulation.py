@@ -1,7 +1,8 @@
 from environment import Environment
 import numpy as np
+import json
 
-simulation = Environment()
+simulation = Environment(num_nodes=15, num_cars=25)
 
 def print_current_state(simulation):
 
@@ -37,3 +38,15 @@ while not finished:
     state, score, finished = simulation.step(random_action)
 
 print(state, score, finished)
+print('All car journeys')
+print(simulation.all_car_journeys)
+
+# Save journeys in json file
+journey_file = "journeys.json"
+
+with open(journey_file, "w") as json_file:
+    json.dump(simulation.all_car_journeys, json_file)
+
+#Save map adjacency matrix
+map_file = "adjacency.npy"
+np.save(map_file, simulation.map.binary_adjacency)

@@ -37,7 +37,7 @@ class Map:
         self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
         self.adjacency = self.generate()
         self.weight_matrix = self.get_weight_matrix()
-
+        self.binary_adjacency = self.get_binary_adjacency()
         self.nodes = self.generate_nodes()
         self.intersections = self.get_intersections()
 
@@ -150,8 +150,11 @@ class Map:
         adjacency_weights = np.array(adjacency_weights)
 
         return adjacency_weights
-
-
+    
+    def get_binary_adjacency(self):
+        binary_adjacency = np.array(self.weight_matrix != 0.0)
+        return binary_adjacency
+    
 if __name__ == '__main__':
     # Test the graph
     graph = Map(10) # Creates instance of graph with 10 different nodes

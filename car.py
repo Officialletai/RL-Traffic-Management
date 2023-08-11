@@ -9,7 +9,7 @@ from map import Map
 
 # Constants
 MAX_PROGRESS = 100
-DEFAULT_SPEED_MULTIPLIER = (100 / 60) * 5# Conversion to seconds from 100 percent
+DEFAULT_SPEED_MULTIPLIER = (100 / 60) * 0.5# Conversion to seconds from 100 percent
 
 class Car:
     def __init__(self, car_id: int, map_: Map, origin: int, destination: int, time: int = 0):
@@ -48,6 +48,7 @@ class Car:
         self.on_edge = False # True
         self.finished = False #bool(self.current == self.destination)
         self.speed = 0
+        self.set_off = False # Checks if car has set off on its journey i.e. has it left the origin node
     
     @property
     def reward(self) -> float:
