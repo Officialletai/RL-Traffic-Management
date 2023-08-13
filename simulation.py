@@ -2,7 +2,7 @@ from environment import Environment
 import numpy as np
 import json
 
-simulation = Environment(num_nodes=15, num_cars=25)
+simulation = Environment(num_nodes=10, num_cars=10)
 
 def print_current_state(simulation):
 
@@ -26,8 +26,8 @@ def random_actions(simulation):
     print(actions)
     return actions
 
-for node, action in random_actions(simulation):
-    simulation.controller.change_traffic_lights(node, action)
+# for node, action in random_actions(simulation):
+#     simulation.controller.change_traffic_lights(node, action)
 
 print_current_state(simulation)
 
@@ -40,10 +40,10 @@ while not finished:
 print(state, score, finished)
 print('All car journeys')
 print(simulation.all_car_journeys)
+print(simulation.time)
 
 # Save journeys in json file
 journey_file = "journeys.json"
-
 with open(journey_file, "w") as json_file:
     json.dump(simulation.all_car_journeys, json_file)
 

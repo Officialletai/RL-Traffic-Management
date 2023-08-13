@@ -2,7 +2,7 @@ import numpy as np
 import json
 import random
 from edge import Edge
-from light import Light
+from light import Light, WAIT_TIME_BEFORE_CHANGE
 
 class Node:
     def __init__(self, label, connections):
@@ -28,7 +28,6 @@ class Node:
         self.degree = np.count_nonzero(connections)
 
         self.traffic_lights = self.get_traffic_lights()
-
         self.queues = self.get_queues()
         self.pointers = self.get_pointers()
 
@@ -49,7 +48,8 @@ class Node:
         else:
             # if terminal node / degree == 1: create incoming and outgoing queue respectively
             self.queues = {'A': [], 'B': []}
-            self.traffic_lights = {'A': {'B': Light()}, 'B': {'A': Light()}}
+            light_start_time = random.randint(0, WAIT_TIME_BEFORE_CHANGE)
+            self.traffic_lights = {'A': {'B': Light(light_start_time)}, 'B': {'A': Light(light_start_time)}}
             index_of_connected_node = next((i for i, val in enumerate(self.connections) if val), 0)
             self.edge_labels = {self.label: 'A', str(index_of_connected_node) : 'B'}
             self.phase = 1
@@ -77,8 +77,12 @@ class Node:
         {'current_edge_1': {'next_edge_1': Light instance, 'next_edge_2': Light instance}, 'current_edge_2': ...}"""
         keys = 'ABCD'[:self.degree]
         traffic_lights = {}
+        # We initialise all lights at the same node with the same self.time, and this is picked randomly
+        # so that lights from different nodes are initialised at a different value, to avoid having all lights
+        # at all nodes being changeable at the same simulation time step only. 
+        light_start_time = random.randint(0, WAIT_TIME_BEFORE_CHANGE)
         for key in keys:
-            traffic_lights[key] = {keys[j]: Light() for j in range(self.degree) if keys[j]!=key}
+            traffic_lights[key] = {keys[j]: Light(light_start_time) for j in range(self.degree) if keys[j]!=key}
         
         return traffic_lights
     
@@ -93,6 +97,20 @@ class Node:
 
         return traffic_light_states        
 
+    ########################## TO FIX: CURRENT IMPLEMENTATION ALWAYS RETURNS FALSE #################################### 
+    # def lights_changeable(self):
+    #     """
+    #     Checks if enough time has elapsed since last node lights state change for the lights to be changeable again
+    #     """
+    #     changeable = []
+
+    #     for current_edge in self.traffic_lights:
+    #         for next_edge in self.traffic_lights[str(current_edge)]:
+    #             changeable.append(self.traffic_lights[str(current_edge)][str(next_edge)].if_changeable())
+        
+    #     # check if all elements in array are True, i.e. if all traffic lights in the node are changeable
+    #     return(np.sum(changeable) == len(changeable))  
+    
     def get_queues(self):
         """
         Initialises the necessary amount of queues for an intersection and stores them in a dictionary in the

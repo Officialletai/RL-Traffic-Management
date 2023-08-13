@@ -73,12 +73,12 @@ class Controller:
                     # print(f'Node {node_number} Current Light State:')
                     # print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
                     # print('Changing Lights...')
-                    self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state = phase[str(i)][str(j)]
+                    self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].change_state(phase[str(i)][str(j)])
                     # print('New Light State:')
                     # print(f'{str(i)} ---> {str(j)}: ', self.map.nodes[str(node_number)].traffic_lights[str(i)][str(j)].state)
                 elif i == j and self.map.intersections[node_number] == 1:
-                    self.map.nodes[str(node_number)].traffic_lights['A']['B'].state = phase['A']['B']
-                    self.map.nodes[str(node_number)].traffic_lights['B']['A'].state = phase['B']['A']
+                    self.map.nodes[str(node_number)].traffic_lights['A']['B'].change_state(phase['A']['B'])
+                    self.map.nodes[str(node_number)].traffic_lights['B']['A'].change_state(phase['B']['A'])
 
  
 if __name__ == "__main__":

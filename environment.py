@@ -1,6 +1,7 @@
 from controller import Controller
 from map import Map
 from car import Car
+from node import Node
 
 import numpy as np
 import random
@@ -241,6 +242,12 @@ class Environment:
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
         
+
+        # for node, phase in actions:
+        #     if self.map.nodes[str(node)].lights_changeable:
+        #         self.controller.change_traffic_lights(node, phase)
+
+
         car_count = 0
         for car in self.cars[:]:
             if car.finished:
