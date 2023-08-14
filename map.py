@@ -157,7 +157,7 @@ class Map:
     
 if __name__ == '__main__':
     # Test the graph
-    graph = Map(10) # Creates instance of graph with 10 different nodes
+    graph = Map(num_nodes=3, sparsity_dist=[0.25, 0.75]) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))

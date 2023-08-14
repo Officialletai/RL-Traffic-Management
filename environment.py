@@ -8,7 +8,7 @@ import random
 
 
 class Environment:
-    def __init__(self, num_nodes=10, num_cars=10):
+    def __init__(self, num_nodes=3, num_cars=1):
         """
         Initializes the environment.
         
@@ -20,7 +20,7 @@ class Environment:
         - score (int): Evaluation metric, quantifies how well cars navigate the environment.
         """
         self.num_nodes = num_nodes
-        self.map = Map(num_nodes=self.num_nodes)
+        self.map = Map(num_nodes=self.num_nodes, sparsity_dist=[0.25, 0.75])
 
         self.num_cars = num_cars
         self.cars = self.initialise_cars(self.num_cars)
@@ -46,8 +46,10 @@ class Environment:
         """
         cars_list = []
         for index in range(num_cars):
-            start = random.randrange(0, self.map.num_nodes)
-            stop = random.randrange(0, self.map.num_nodes)
+            #start = random.randrange(0, self.map.num_nodes)
+            #stop = random.randrange(0, self.map.num_nodes)
+            start = 0
+            stop = 2
             # if stop == start:
             #     stop += 1
             while stop == start:
@@ -70,7 +72,7 @@ class Environment:
         Returns:
         - tuple: Represents the state of the environment after reset.
         """
-        self.map = Map(num_nodes=self.num_nodes)
+        self.map = Map(num_nodes=self.num_nodes, sparsity_dist=[0.25, 0.75])
         self.cars = self.initialise_cars(num_cars=self.num_cars)
         self.controller = Controller(self.map)
 

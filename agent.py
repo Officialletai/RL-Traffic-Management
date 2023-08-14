@@ -12,8 +12,8 @@ import os
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 128)
-        self.fc2 = nn.Linear(128, output_size)
+        self.fc1 = nn.Linear(input_size, 32)
+        self.fc2 = nn.Linear(32, output_size)
 
     def forward(self, state):
         x = torch.relu(self.fc1(state))
@@ -21,11 +21,11 @@ class DQN(nn.Module):
 
 # There will be as many agent as there are nodes
 class NodeAgent:
-    def __init__(self, input_size, output_size, node_number, epsilon):
+    def __init__(self, input_size, output_size, node_number, epsilon, discount_factor, learning_rate):
 
         # Hyperparameters
-        self.discount_factor = 0.995
-        self.learning_rate = 0.001
+        self.discount_factor = discount_factor
+        self.learning_rate = learning_rate
         self.epsilon = epsilon
         
         self.environment = Environment()
@@ -73,10 +73,12 @@ class NodeAgent:
         self.model.load_state_dict(torch.load(path))
 
 class MultiAgent:
-    def __init__(self, environment):
+    def __init__(self, environment, epsilon_decay_rate, discount_factor, learning_rate):
         self.epsilon = 1.0
         self.epsilon_min = 0.0001
-        self.epsilon_decay_rate = 0.99975
+        self.epsilon_decay_rate = epsilon_decay_rate
+        self.discount_factor = discount_factor
+        self.learning_rate = learning_rate
 
         self.environment = environment
         self.num_nodes = self.environment.map.num_nodes
@@ -86,7 +88,7 @@ class MultiAgent:
             degree = self.environment.map.nodes[str(node)].degree
             input_dimension = (2*(degree*degree))+degree #queue, traffic light, edge
             output_dimension = len(self.environment.controller.get_phase(degree))
-            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.epsilon)
+            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.epsilon, self.discount_factor, self.learning_rate)
 
     def get_actions(self, local_states):
         actions = {}
@@ -128,9 +130,9 @@ class MultiAgent:
             agent.load_model(f"{save_dir}/agent_{node}.pth")
 
 
-def train_multi_agent(episodes=1250):
+def train_multi_agent(episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005):
     env = Environment()
-    multi_agent = MultiAgent(env)
+    multi_agent = MultiAgent(env, epsilon_decay_rate, discount_factor, learning_rate)
     times = []
     average_car_wait_time = []
     
@@ -183,11 +185,8 @@ if __name__ == "__main__":
         print(f"Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
     
         # Update the values in your code
-        NodeAgent.discount_factor = discount_factor
-        NodeAgent.learning_rate = learning_rate
-        MultiAgent.epsilon_decay_rate = epsilon_decay_rate
 
-        train_multi_agent()
+        train_multi_agent(500, epsilon_decay_rate, discount_factor, learning_rate)
 
 
  

@@ -1,7 +1,7 @@
 import random
 
 # State space for individual traffic light = R/G, or in binary 0/1
-WAIT_TIME_BEFORE_CHANGE = 10
+WAIT_TIME_BEFORE_CHANGE = 0
 
 class Light:
     def __init__(self, time=0):

@@ -9,7 +9,7 @@ from map import Map
 
 # Constants
 MAX_PROGRESS = 100
-DEFAULT_SPEED_MULTIPLIER = (100 / 60) * 0.5# Conversion to seconds from 100 percent
+DEFAULT_SPEED_MULTIPLIER = (100 / 60) * 5 # Conversion to seconds from 100 percent
 
 class Car:
     def __init__(self, car_id: int, map_: Map, origin: int, destination: int, time: int = 0):
@@ -340,9 +340,9 @@ class Car:
         return path_weights
 
 if __name__ == '__main__':
-    london = Map(10) 
-    start = random.randrange(0, london.num_nodes - 1)
-    stop = random.randrange(5, london.num_nodes - 1)
+    london = Map(3, sparsity_dist=[0.25, 0.75]) 
+    start = random.randrange(0, london.num_nodes - 2)
+    stop = random.randrange(1, london.num_nodes - 1)
     while stop == start:
         stop = random.randrange(0, london.num_nodes - 1)
     
