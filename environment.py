@@ -245,11 +245,6 @@ class Environment:
 
         for node, phase in actions:
             self.controller.change_traffic_lights(node, phase)
-        
-
-        # for node, phase in actions:
-        #     if self.map.nodes[str(node)].lights_changeable:
-        #         self.controller.change_traffic_lights(node, phase)
 
 
         car_count = 0
@@ -307,6 +302,7 @@ class Environment:
                     # appear to be jumping to a random adjacent node at the very start of the replay
                     self.all_car_journeys[str(car.id)].append([(int(current_node), int(next_node)), car.road_progress/100]) # current, next
 
+
                 self.reward_array[car.current] += -1
                 # # get traffic light of next node [row][column]
                 # traffic_light = self.map.traffic_light_instances[current_node][previous_node][next_node]
@@ -344,7 +340,6 @@ class Environment:
         
 
         self.time += 1
-
         return self.get_local_state(), self.reward_array, finished
 
 if __name__ =='__main__':

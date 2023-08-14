@@ -12,8 +12,8 @@ import os
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(input_size, 32)
-        self.fc2 = nn.Linear(32, output_size)
+        self.fc1 = nn.Linear(input_size, 16)
+        self.fc2 = nn.Linear(16, output_size)
 
     def forward(self, state):
         x = torch.relu(self.fc1(state))
@@ -21,24 +21,27 @@ class DQN(nn.Module):
 
 # There will be as many agent as there are nodes
 class NodeAgent:
-    def __init__(self, input_size, output_size, node_number, epsilon, discount_factor, learning_rate):
+    def __init__(self, input_size, output_size, node_number, discount_factor, learning_rate):
 
         # Hyperparameters
         self.discount_factor = discount_factor
         self.learning_rate = learning_rate
-        self.epsilon = epsilon
         
         self.environment = Environment()
         self.model = DQN(input_size,output_size)
         self.optimizer = optim.Adam(self.model.parameters(), lr = self.learning_rate)
         self.node_number = node_number
 
-    def pick_action(self, state):
-        if random.random() < self.epsilon:
-            return self.environment.pick_random_phase(self.node_number)
+    def pick_action(self, state, epsilon):
+        if random.random() < epsilon:
+            
+            action = self.environment.pick_random_phase(self.node_number)
+            return action
+            
         else:
+            state = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
             q_values = self.model(state)
-            action = torch.argmax(q_values).item()
+            action = torch.argmax(q_values).item() + 1
             return action
 
     def train(self, state, action, reward, next_state, done):
@@ -86,18 +89,20 @@ class MultiAgent:
 
         for node in range(self.num_nodes):
             degree = self.environment.map.nodes[str(node)].degree
+            if degree == 1:
+                degree = 2
             input_dimension = (2*(degree*degree))+degree #queue, traffic light, edge
             output_dimension = len(self.environment.controller.get_phase(degree))
-            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.epsilon, self.discount_factor, self.learning_rate)
+            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.discount_factor, self.learning_rate)
 
     def get_actions(self, local_states):
         actions = {}
 
         for node in self.agents:
             local_state = local_states[node]
-            action = self.agents[node].pick_action(local_state)
+            action = self.agents[node].pick_action(local_state, self.epsilon)
             actions[node] = action
-        
+
         return actions 
         
     def update_agents(self, local_states, actions, rewards, next_local_states, finished, episode):
@@ -106,8 +111,7 @@ class MultiAgent:
             action = actions[node]
             reward = rewards[node]
             next_local_state = next_local_states[node]
-            if self.environment.map.intersections[self.agents[node].node_number] == 1:
-                continue
+
             self.agents[node].train(local_state, action, reward, next_local_state, finished)
         
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
@@ -128,6 +132,9 @@ class MultiAgent:
         
         for node, agent in self.agents.items():
             agent.load_model(f"{save_dir}/agent_{node}.pth")
+        
+    def decay_epsilon(self):
+        self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
 
 def train_multi_agent(episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005):
@@ -154,6 +161,7 @@ def train_multi_agent(episodes=1250, epsilon_decay_rate=0.995, discount_factor=0
             multi_agent.update_agents(local_states, actions, rewards, next_local_states, finished, episode)
             local_states = next_local_states
         
+        #multi_agent.decay_epsilon()
         times.append(env.time)
 
         avg_time = sum(env.time_in_traffic.values()) / len(env.time_in_traffic)
@@ -174,8 +182,8 @@ if __name__ == "__main__":
 
     # Define potential values for hyperparameters
     discount_factors = [0.9975, 0.9995, 0.999925]
-    learning_rates = [0.00025, 0.0001]
-    epsilon_decay_rates = [0.99975, 0.99995, 0.9999925]
+    learning_rates = [0.001, 0.0005, 0.0001]
+    epsilon_decay_rates = [0.99975]
 
     # Create a list of all combinations of hyperparameters
     hyperparameters = list(itertools.product(discount_factors, learning_rates, epsilon_decay_rates))
@@ -186,7 +194,7 @@ if __name__ == "__main__":
     
         # Update the values in your code
 
-        train_multi_agent(500, epsilon_decay_rate, discount_factor, learning_rate)
+        train_multi_agent(2500, epsilon_decay_rate, discount_factor, learning_rate)
 
 
  

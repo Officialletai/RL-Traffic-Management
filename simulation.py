@@ -2,7 +2,7 @@ from environment import Environment
 import numpy as np
 import json
 
-simulation = Environment(num_nodes=10, num_cars=10)
+simulation = Environment()
 
 def print_current_state(simulation):
 
