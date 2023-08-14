@@ -239,6 +239,8 @@ class Environment:
         Returns:
         - tuple: New state of the environment, current score, and boolean indicating if simulation is finished.
         """
+        self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}
+        self.local_states = {}
         finished = True
 
         for node, phase in actions:
@@ -339,8 +341,7 @@ class Environment:
             
             #print('car id:', car.id, 'car path: ', car.path, 'road progression', car.road_progress, '\n')
 
-        self.reward_array = {node_number:0 for node_number in range(self.map.num_nodes)}
-        self.local_states = {}
+        
 
         self.time += 1
 
