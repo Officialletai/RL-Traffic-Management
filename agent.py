@@ -8,6 +8,7 @@ import torch.optim as optim
 import numpy as np
 import itertools
 import os
+import optuna
 
 class DQN(nn.Module):
     def __init__(self, input_size, output_size):
@@ -181,21 +182,20 @@ def train_multi_agent(episodes=1250, epsilon_decay_rate=0.995, discount_factor=0
 
 if __name__ == "__main__":
 
-    # Define potential values for hyperparameters
-    discount_factors = [0.9975, 0.9995, 0.999925]
-    learning_rates = [0.001, 0.0005, 0.0001]
-    epsilon_decay_rates = [0.99975]
+    def objective_function(trial):
+        discount_factor = trial.suggest_float("discount_factor", 0.995, 0.9999, step=0.0001)
+        learning_rate = trial.suggest_float("learning_rate", 1e-4, 1e-2, log=True)
+        epsilon_decay_rate = trial.suggest_float("epsilon_decay_rate", 0.999, 0.9999, step=0.0001)
 
-    # Create a list of all combinations of hyperparameters
-    hyperparameters = list(itertools.product(discount_factors, learning_rates, epsilon_decay_rates))
-
-    # Loop over each combination of hyperparameters and train your model
-    for discount_factor, learning_rate, epsilon_decay_rate in hyperparameters:
         print(f"Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
-    
-        # Update the values in your code
+        performance = train_multi_agent(2500, epsilon_decay_rate, discount_factor, learning_rate)
+        
+        return performance
 
-        train_multi_agent(2500, epsilon_decay_rate, discount_factor, learning_rate)
+    test = optuna.create_study(direction="maximize")
+    test.optimize(objective_function, n_trials=100)
 
-
+    best_params = test.best_params
+    best_reward = test.best_value
+    print(f"Best parameters: {best_params} with reward: {best_reward}")
  
