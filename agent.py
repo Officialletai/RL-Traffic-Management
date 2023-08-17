@@ -139,6 +139,7 @@ class MultiAgent:
 
 def train_multi_agent(episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005):
     env = Environment()
+    env.map.draw()
     multi_agent = MultiAgent(env, epsilon_decay_rate, discount_factor, learning_rate)
     times = []
     average_car_wait_time = []

@@ -48,6 +48,9 @@ class Map:
     def adjacency_to_graph(self, adjacency_matrix):
         graph = nx.Graph()
 
+        for node in range(self.num_nodes):
+            graph.add_node(node)
+
         for i in range(self.num_nodes):
             for j in range(i + 1, self.num_nodes):
                 edge = adjacency_matrix[i][j]
@@ -75,9 +78,6 @@ class Map:
             component_1 = random.choice(components)
             component_2 = random.choice([comp for comp in components if comp != component_1])
 
-            node_1 = self.select_node_with_room_for_edge(graph, component_1)
-            node_2 = self.select_node_with_room_for_edge(graph, component_2)
-
             randomness_count = 0
             while randomness_count < 5:
                 node_1 = self.select_node_with_room_for_edge(graph, component_1)
@@ -85,7 +85,6 @@ class Map:
                 randomness_count += 1
 
                 if node_1 and node_2:
-                    print('randomness count',randomness_count)
                     break
 
             if node_1 is None or node_2 is None:
@@ -126,6 +125,31 @@ class Map:
                     adjacency_matrix[i][j] = 0
 
         return adjacency_matrix
+    
+    def ensure_all_nodes_present(self, graph):
+        for node in range(self.num_nodes):
+            
+            if len(graph[node]) == 0:
+                # if so, node is missing, find another node to connect to
+                other_nodes = list(range(self.num_nodes))
+                random.shuffle(other_nodes)
+
+                for other_node in other_nodes:
+                    if len(graph[other_node]) < self.max_edge and other_node != node:
+                        # connect node with random edge
+                        # Sample a road length from a normal distribution
+                        random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
+                        # min road distance is 10km
+                        distance = max(10, random_road_length)
+
+                        # Choose a speed limit based on the sampled road length
+                        if distance < (self.mu_distance - self.sigma_distance):
+                            speed_limit = random.choice(self.speed_lower)
+                        else:
+                            speed_limit = random.choice(self.speed_upper)
+
+                        graph.add_edge(node, other_node, speed_limit=speed_limit, distance=distance)
+                        break
     
 
     def generate(self):
@@ -174,6 +198,9 @@ class Map:
 
         # Ensure connectivity
         self.ensure_connected(graph)
+        
+        # Ensure all nodes present
+        self.ensure_all_nodes_present(graph)
 
         # Convert the graph back to an adjacency matrix
         adjacency_matrix = self.graph_to_adjacency(graph)

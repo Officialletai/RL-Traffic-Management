@@ -22,7 +22,7 @@ class Environment:
         self.num_nodes = num_nodes
         self.sparsity_dist = sparsity_dist
         self.map = Map(num_nodes=self.num_nodes, sparsity_dist=self.sparsity_dist)
-
+        
         self.num_cars = num_cars
         self.cars = self.initialise_cars(self.num_cars)
         self.controller = Controller(self.map)
@@ -344,6 +344,6 @@ class Environment:
         return self.get_local_state(), self.reward_array, finished
 
 if __name__ =='__main__':
-    test = Environment()
+    test = Environment(5)
     print(test.cars)
     test.get_state()
