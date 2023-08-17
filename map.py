@@ -12,7 +12,7 @@ class Map:
     Map is a class representing an undirected, weighted graph, which is our choice of representation for a real map.
     """
 
-    def __init__(self, num_nodes=10, sparsity_dist=[0.65, 0.35]):
+    def __init__(self, num_nodes=10, sparsity_dist=[0.99, 0.01]):
         """
         Initialize a graph.
 
@@ -43,8 +43,91 @@ class Map:
 
         # self.traffic_light_matrix = self.traffic_light_locations()
         # self.traffic_light_instances = self.generate_traffic_light_instances()
+    
+
+    def adjacency_to_graph(self, adjacency_matrix):
+        graph = nx.Graph()
+
+        for i in range(self.num_nodes):
+            for j in range(i + 1, self.num_nodes):
+                edge = adjacency_matrix[i][j]
+                if edge != 0:
+                    graph.add_edge(i, j, speed_limit=edge.speed_limit, distance=edge.distance)
         
-        
+        return graph
+    
+
+    def select_node_with_room_for_edge(self, graph, component):
+        nodes = list(component)
+        random.shuffle(nodes)  # Shuffle the nodes for randomness
+        for node in nodes:
+            if len(graph[node]) < self.max_edge:
+                return node
+        return None  # Return None if no suitable node is found
+
+
+    def ensure_connected(self, graph):
+        while not nx.is_connected(graph):
+            # components == islands of nodes
+            components = list(nx.connected_components(graph))
+            
+            # we pick two random components
+            component_1 = random.choice(components)
+            component_2 = random.choice([comp for comp in components if comp != component_1])
+
+            node_1 = self.select_node_with_room_for_edge(graph, component_1)
+            node_2 = self.select_node_with_room_for_edge(graph, component_2)
+
+            randomness_count = 0
+            while randomness_count < 5:
+                node_1 = self.select_node_with_room_for_edge(graph, component_1)
+                node_2 = self.select_node_with_room_for_edge(graph, component_2)
+                randomness_count += 1
+
+                if node_1 and node_2:
+                    print('randomness count',randomness_count)
+                    break
+
+            if node_1 is None or node_2 is None:
+                # if this error is ever raised, switch this to generating a new graph preferrably with a different sparsity distribution
+                raise ValueError("Unable to ensure connectivity while obeying max_edge constraint.")
+            
+
+            # Sample a road length from a normal distribution
+            random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
+            # min road distance is 10km
+            distance = max(10, random_road_length)
+
+            # Choose a speed limit based on the sampled road length
+            if distance < (self.mu_distance - self.sigma_distance):
+                speed_limit = random.choice(self.speed_lower)
+            else:
+                speed_limit = random.choice(self.speed_upper)
+            
+            graph.add_edge(node_1, node_2, speed_limit=speed_limit, distance=distance)
+
+
+    def graph_to_adjacency(self, graph):
+
+        adjacency_matrix = np.empty((self.num_nodes, self.num_nodes), dtype=object)
+
+        for i in range(self.num_nodes):
+            for j in range(self.num_nodes):
+                if i == j:
+                    adjacency_matrix[i][j] = 0
+
+                elif graph.has_edge(i, j):
+                    distance = graph[i][j]['distance']
+                    distance = graph[i][j]['distance']
+                    speed_limit = graph[i][j]['speed_limit']
+                    adjacency_matrix[i][j] = Edge(speed_limit, distance)
+
+                else:
+                    adjacency_matrix[i][j] = 0
+
+        return adjacency_matrix
+    
+
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
@@ -85,6 +168,15 @@ class Map:
                     if edge_or_not != 0:
                         edge_count[i] += 1
                         edge_count[j] += 1
+        
+        # Convert the adjacency matrix to a networkx graph for easier processing
+        graph = self.adjacency_to_graph(adjacency_matrix)
+
+        # Ensure connectivity
+        self.ensure_connected(graph)
+
+        # Convert the graph back to an adjacency matrix
+        adjacency_matrix = self.graph_to_adjacency(graph)
 
         return adjacency_matrix
     
@@ -157,7 +249,7 @@ class Map:
     
 if __name__ == '__main__':
     # Test the graph
-    graph = Map(num_nodes=3, sparsity_dist=[0.25, 0.75]) # Creates instance of graph with 10 different nodes
+    graph = Map(50) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))
