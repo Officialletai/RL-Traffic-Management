@@ -12,7 +12,7 @@ class Map:
     Map is a class representing an undirected, weighted graph, which is our choice of representation for a real map.
     """
 
-    def __init__(self, num_nodes=10, sparsity_dist=[0.99, 0.01]):
+    def __init__(self, num_nodes=10, sparsity_dist=[0.35, 0.65]):
         """
         Initialize a graph.
 
@@ -249,7 +249,7 @@ class Map:
     
 if __name__ == '__main__':
     # Test the graph
-    graph = Map(50) # Creates instance of graph with 10 different nodes
+    graph = Map(10) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))
