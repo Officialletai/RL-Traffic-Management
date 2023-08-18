@@ -147,13 +147,8 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
     times = []
     average_car_wait_time = []
     recent_avg_wait_times = deque(maxlen=5)
-    
-    # for validation, we swap the sparsity distribution around for variance
-    validation_env = Environment(num_nodes=num_nodes, sparsity_dist=[sparsity_dist[1] , sparsity_dist[0]], num_cars=num_cars)
-    validation_env.map.draw()
 
-    validation_performance = []
-    best_validation_avg_wait_time = float('inf')
+    best_smoothed_avg_wait_time = float('inf')
     no_improvement_counter = 0
     
     for episode in range(episodes):
@@ -197,35 +192,16 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
             times = []
             multi_agent.save_models("dqn_models")
 
-            # Now to validate the model 
-            # total_validation_wait_time = 0
-            # num_validation_episodes = validation_episodes
+            # check for improvement
+            if smoothed_avg_wait_time < best_smoothed_avg_wait_time:
+                best_smoothed_avg_wait_time = smoothed_avg_wait_time
+                no_improvement_counter = 0
+            else:
+                no_improvement_counter += 1
 
-            # for _ in range(num_validation_episodes):
-            #     validation_env.reset()
-            #     local_states = validation_env.get_local_state()
-            #     finished = False 
-
-            #     while not finished:
-            #         actions = multi_agent.get_actions(local_states)
-            #         actions_array = list(actions.items())
-            #         next_local_states, rewards, finished = validation_env.step(actions_array)
-            #         # Skip training step
-            #         local_states = next_local_states
-                
-            #     average_validation_wait_time = total_validation_wait_time / num_validation_episodes
-            #     validation_performance.append(average_validation_wait_time)
-
-            #     if average_validation_wait_time < best_validation_avg_wait_time:
-            #         best_validation_avg_wait_time = average_validation_wait_time
-            #         no_improvement_counter = 0
-            #     else:
-            #         no_improvement_counter += 1
-
-            #     # Early stopping based on validation performance
-            #     if no_improvement_counter >= patience:
-            #         print(f"Early stopping at episode {episode} due to no improvement in validation performance.")
-            #         break
+            if no_improvement_counter >= patience:
+                print(f"Early stopping at episode {episode} due to no improvement in average score.")
+                break
     
     return times
 
@@ -237,7 +213,7 @@ if __name__ == "__main__":
     NUM_CARS=10
     EPISODES=2500
     N_TRIALS=100
-    PATIENCE=3
+    PATIENCE=5
     VALIDATION_EPISODES=5
 
     def objective_function(trial):
