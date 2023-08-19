@@ -203,7 +203,7 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
                 print(f"Early stopping at episode {episode} due to no improvement in average score.")
                 break
     
-    return times
+    return -smoothed_avg_wait_time
 
 if __name__ == "__main__":
     NUM_NODES = 10
@@ -212,16 +212,16 @@ if __name__ == "__main__":
     SPARSITY_DIST=[0.35, 0.65]
     NUM_CARS=10
     EPISODES=2500
-    N_TRIALS=100
+    N_TRIALS=10
     PATIENCE=5
     VALIDATION_EPISODES=5
 
     def objective_function(trial):
-        discount_factor = trial.suggest_float("discount_factor", 0.995, 0.9999, step=0.0001)
+        discount_factor = trial.suggest_float("discount_factor", 0.995, 0.9999, step=0.001)
         learning_rate = trial.suggest_float("learning_rate", 1e-4, 1e-2, log=True)
-        epsilon_decay_rate = trial.suggest_float("epsilon_decay_rate", 0.999, 0.9999, step=0.0001)
+        epsilon_decay_rate = trial.suggest_float("epsilon_decay_rate", 0.9995, 0.99999, step=0.0001)
 
-        print(f"Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
+        print(f"Trial={trial.number}, Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
         performance = train_multi_agent(
             num_nodes=NUM_NODES, 
             sparsity_dist=SPARSITY_DIST, 
