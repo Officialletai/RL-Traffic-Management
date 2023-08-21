@@ -23,13 +23,13 @@ class DQN(nn.Module):
 
 # There will be as many agent as there are nodes
 class NodeAgent:
-    def __init__(self, input_size, output_size, node_number, discount_factor, learning_rate):
+    def __init__(self, input_size, output_size, node_number, discount_factor, learning_rate, environment):
 
         # Hyperparameters
         self.discount_factor = discount_factor
         self.learning_rate = learning_rate
         
-        self.environment = Environment()
+        self.environment = environment
         self.model = DQN(input_size,output_size)
         self.optimizer = optim.Adam(self.model.parameters(), lr = self.learning_rate)
         self.node_number = node_number
@@ -95,7 +95,7 @@ class MultiAgent:
                 degree = 2
             input_dimension = (2*(degree*degree))+degree #queue, traffic light, edge
             output_dimension = len(self.environment.controller.get_phase(degree))
-            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.discount_factor, self.learning_rate)
+            self.agents[node] = NodeAgent(input_dimension, output_dimension, node, self.discount_factor, self.learning_rate, self.environment)
 
     def get_actions(self, local_states):
         actions = {}
@@ -153,7 +153,6 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
     
     for episode in range(episodes):
         env.reset()
-        
         local_states = env.get_local_state()
 
         finished = False
