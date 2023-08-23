@@ -228,6 +228,11 @@ class Environment:
         return random_phase
 
 
+    def pick_random_phase_degree(self, degree):
+        possible_phases = range(1, len(self.controller.get_phase(degree)) + 1)
+        random_phase = np.random.choice(possible_phases)
+        return random_phase
+
 
     def step(self, actions):
         """
