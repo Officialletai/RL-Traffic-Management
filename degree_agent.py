@@ -221,6 +221,7 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
                         raise optuna.TrialPruned()
 
             # Now to validate the model 
+            last_validation = 0
             validation_average_car_wait_time = []
             num_validation_episodes = validation_episodes
 
@@ -238,21 +239,21 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
 
                 average_validation_wait_time = sum(validation_env.time_in_traffic.values()) / len(validation_env.time_in_traffic)
                 validation_average_car_wait_time.append(average_validation_wait_time)
-            
-            validation_post.append(np.mean(validation_average_car_wait_time))
+            last_validation = np.mean(validation_average_car_wait_time)
+            validation_post.append(last_validation)
 
             print(
-                f"Epochs: {episode}, average_car_wait_time: {np.mean(average_car_wait_time):.3f}, validation_post: {np.mean(validation_post):.3f}, epsilon_value: {multi_agent.epsilon:.6f}, "
+                f"Epochs: {episode}, average_car_wait_time: {np.mean(average_car_wait_time):.3f}, validation_wait_time: {last_validation:.3f}, epsilon_value: {multi_agent.epsilon:.6f}, "
             )
 
             patience_counter += 1
             
             if patience_counter >= patience:
-                validiation_avg_post = np.mean(validation_post)
-                validiation_avg_prior = np.mean(validation_prior)
-                print(f'validiation_avg_prior: {validiation_avg_prior:.5f} validiation_avg_post : {validiation_avg_post:.5f}')
+                validation_avg_post = np.mean(validation_post)
+                validation_avg_prior = np.mean(validation_prior)
+                print(f'validation_avg_prior: {validation_avg_prior:.5f} validation_avg_post : {validation_avg_post:.5f}')
 
-                if validiation_avg_post > validiation_avg_prior:
+                if validation_avg_post > validation_avg_prior:
                     print(f"Early stopping at episode {episode} due to no improvement in validation performance.")
                     break
 
@@ -270,11 +271,9 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
     return smoothed_avg_wait_time
 
 if __name__ == "__main__":
-    NUM_NODES = 10
-    # Try not to have 50/50 sparsity so that our validation env can have some variance
-    # Might be a better to handle validation env vs normal env
+    NUM_NODES = 15
     SPARSITY_DIST=[0.35, 0.65]
-    NUM_CARS=30
+    NUM_CARS=75
     EPISODES=2500
     N_TRIALS=10
     PATIENCE=4
