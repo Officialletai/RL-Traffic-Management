@@ -12,7 +12,7 @@ class Map:
     Map is a class representing an undirected, weighted graph, which is our choice of representation for a real map.
     """
 
-    def __init__(self, num_nodes=10, sparsity_dist=[0.35, 0.65]):
+    def __init__(self, num_nodes=10, sparsity_dist=[0.35, 0.65], seed=28062023):
         """
         Initialize a graph.
 
@@ -21,7 +21,7 @@ class Map:
         """
 
         # Set the random seed
-        random.seed(28062023)
+        random.seed(seed)
 
         # mu_distance and sigma_distance are parameters for the normal distribution from which road lengths are drawn
         self.mu_distance = 50

@@ -118,13 +118,13 @@ class MultiAgent:
                 self.degrees[degree] = [index]
 
 
-    def get_actions(self, local_states):
+    def get_actions(self, local_states, environment):
         actions = {}
 
         for node in range(self.num_nodes):
 
             local_state = local_states[node]
-            degree = self.environment.map.intersections[node]
+            degree = environment.map.intersections[node]
             action = self.agents[degree].pick_action(local_state, self.epsilon)
             actions[node] = action
 
@@ -133,13 +133,6 @@ class MultiAgent:
     def update_agents(self, local_states, actions, rewards, next_local_states, finished, episode):
         
         for agent in self.degrees:
-            #array_length = len(self.degrees[agent])
-            
-            # get length of value array
-            # random.sample(test, num_sample)
-            # get state values
-            # update value 
-
             memory = []
 
             for node in self.degrees[agent]:
@@ -147,9 +140,8 @@ class MultiAgent:
                 action = actions[node]
                 reward = rewards[node]
                 next_local_state = next_local_states[node]
-
                 memory.append((local_state, action, reward, next_local_state, finished))
-            
+
             self.agents[agent].train(memory)
         
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
@@ -176,16 +168,24 @@ class MultiAgent:
 
 
 def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005, trial=None, patience=3, target_update_freq = 10, validation_episodes=5):
-
     env = Environment(num_nodes, sparsity_dist, num_cars)
     env.map.draw()
+
+
+    # for validation, we swap the sparsity distribution around for variance
+    validation_env = Environment(num_nodes=num_nodes, sparsity_dist=sparsity_dist, num_cars=num_cars, seed=23082023)
+    validation_env.map.draw()
+
+
     multi_agent = MultiAgent(env, epsilon_decay_rate, discount_factor, learning_rate, target_update_freq)
     times = []
     average_car_wait_time = []
     recent_avg_wait_times = deque(maxlen=5)
 
-    best_smoothed_avg_wait_time = float('inf')
-    no_improvement_counter = 0
+    validation_prior = [999]
+    validation_post = []
+
+    patience_counter = 0
     
     for episode in range(episodes):
         env.reset()
@@ -194,7 +194,7 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
         finished = False
 
         while not finished:
-            actions = multi_agent.get_actions(local_states)
+            actions = multi_agent.get_actions(local_states, env)
             # current dictionary:
             # {1: 1, 2:3, 3:1, 4:6}
             # actions -> [(1,1), (2,4), (3,2)]
@@ -213,9 +213,6 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
         smoothed_avg_wait_time = np.mean(recent_avg_wait_times)
 
         if episode % 25 == 0 and episode != 0:
-            print(
-                f"Epochs: {episode}, average_car_wait_time: {np.mean(average_car_wait_time)}, lowest_car_wait_time: {np.amin(average_car_wait_time)}, epsilon_value: {multi_agent.epsilon}"
-            ) 
 
             if trial:
                 trial.report(smoothed_avg_wait_time, episode)
@@ -223,20 +220,52 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
                     if trial.should_prune():
                         raise optuna.TrialPruned()
 
+            # Now to validate the model 
+            validation_average_car_wait_time = []
+            num_validation_episodes = validation_episodes
+
+            for _ in range(num_validation_episodes):
+                validation_env.reset()
+                local_states = validation_env.get_local_state()
+                finished = False 
+
+                while not finished:
+                    actions = multi_agent.get_actions(local_states, validation_env)
+                    actions_array = list(actions.items())
+                    next_local_states, rewards, finished = validation_env.step(actions_array)
+                    # Skip training step
+                    local_states = next_local_states
+
+                average_validation_wait_time = sum(validation_env.time_in_traffic.values()) / len(validation_env.time_in_traffic)
+                validation_average_car_wait_time.append(average_validation_wait_time)
+            
+            validation_post.append(np.mean(validation_average_car_wait_time))
+
+            print(
+                f"Epochs: {episode}, average_car_wait_time: {np.mean(average_car_wait_time):.3f}, validation_post: {np.mean(validation_post):.3f}, epsilon_value: {multi_agent.epsilon:.6f}, "
+            )
+
+            patience_counter += 1
+            
+            if patience_counter >= patience:
+                validiation_avg_post = np.mean(validation_post)
+                validiation_avg_prior = np.mean(validation_prior)
+                print(f'validiation_avg_prior: {validiation_avg_prior:.5f} validiation_avg_post : {validiation_avg_post:.5f}')
+
+                if validiation_avg_post > validiation_avg_prior:
+                    print(f"Early stopping at episode {episode} due to no improvement in validation performance.")
+                    break
+
+                else:
+                    validation_prior = validation_post
+                    validation_post = []
+
+                    patience_counter = 0
+
             average_car_wait_time = []
             times = []
             multi_agent.save_models("dqn_models")
-
-            # check for improvement
-            if smoothed_avg_wait_time < best_smoothed_avg_wait_time:
-                best_smoothed_avg_wait_time = smoothed_avg_wait_time
-                no_improvement_counter = 0
-            else:
-                no_improvement_counter += 1
-
-            if no_improvement_counter >= patience:
-                print(f"Early stopping at episode {episode} due to no improvement in average score.")
-                break
+                                
     
     return smoothed_avg_wait_time
 
@@ -245,13 +274,12 @@ if __name__ == "__main__":
     # Try not to have 50/50 sparsity so that our validation env can have some variance
     # Might be a better to handle validation env vs normal env
     SPARSITY_DIST=[0.35, 0.65]
-    NUM_CARS=10
+    NUM_CARS=30
     EPISODES=2500
     N_TRIALS=10
-    PATIENCE=5
+    PATIENCE=4
     TARGET_UPDATE_FREQ=10
     VALIDATION_EPISODES=5
-
 
     def objective_function(trial):
         discount_factor = trial.suggest_float("discount_factor", 0.996, 0.9999, step=0.00075)
