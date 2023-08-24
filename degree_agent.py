@@ -271,9 +271,9 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
     return smoothed_avg_wait_time
 
 if __name__ == "__main__":
-    NUM_NODES = 15
-    SPARSITY_DIST=[0.35, 0.65]
-    NUM_CARS=75
+    NUM_NODES = 20
+    SPARSITY_DIST=[73, 7]
+    NUM_CARS=100
     EPISODES=2500
     N_TRIALS=10
     PATIENCE=4
@@ -281,9 +281,9 @@ if __name__ == "__main__":
     VALIDATION_EPISODES=5
 
     def objective_function(trial):
-        discount_factor = trial.suggest_float("discount_factor", 0.996, 0.9999, step=0.00075)
+        discount_factor = trial.suggest_float("discount_factor", 0.996, 0.99999, step=0.00075)
         learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
-        epsilon_decay_rate = trial.suggest_float("epsilon_decay_rate", 0.9995, 0.9999, step=0.000075)
+        epsilon_decay_rate = trial.suggest_float("epsilon_decay_rate", 0.9995, 0.99999, step=0.000075)
 
         print(f"Trial={trial.number}, Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
         performance = train_multi_agent(

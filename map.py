@@ -12,7 +12,7 @@ class Map:
     Map is a class representing an undirected, weighted graph, which is our choice of representation for a real map.
     """
 
-    def __init__(self, num_nodes=10, sparsity_dist=[0.35, 0.65], seed=28062023):
+    def __init__(self, num_nodes=10, average_degree=2, seed=28062023):
         """
         Initialize a graph.
 
@@ -34,7 +34,8 @@ class Map:
         self.max_edge = 4
 
         self.num_nodes = num_nodes
-        self.sparsity_dist = sparsity_dist # [no edge % chance, edge % change]
+        self.average_degree = average_degree
+        self.sparsity_dist = [0.2, 0.8]
         self.adjacency = self.generate()
         self.weight_matrix = self.get_weight_matrix()
         self.binary_adjacency = self.get_binary_adjacency()
@@ -117,7 +118,6 @@ class Map:
 
                 elif graph.has_edge(i, j):
                     distance = graph[i][j]['distance']
-                    distance = graph[i][j]['distance']
                     speed_limit = graph[i][j]['speed_limit']
                     adjacency_matrix[i][j] = Edge(speed_limit, distance)
 
@@ -152,47 +152,73 @@ class Map:
                         break
     
 
+    def calculate_average_degree(self, graph):
+        num_edges = graph.number_of_edges()
+        num_nodes = graph.number_of_nodes()
+        avg_degree = (2 * num_edges) / num_nodes
+        return avg_degree
+    
+
     def generate(self):
         """
         Generate the adjacency matrix of the graph.
         """
-        adjacency_matrix = np.empty((self.num_nodes, self.num_nodes), dtype=object)
+
+        total_possible_edges = (self.num_nodes * (self.num_nodes - 1)) / 2
+        average_num_edges = (self.average_degree * self.num_nodes) / 2
+        edge_probability = average_num_edges / total_possible_edges
+        self.sparsity_dist = [1 - edge_probability, edge_probability]
+
+        adjacency_matrix = np.zeros((self.num_nodes, self.num_nodes), dtype=object)
 
         # Keep track of the number of edges per node
         edge_count = [0 for i in range(self.num_nodes)]
 
-        # Fill adjacency_matrix with Edges (or 0s where no edge exists)
-        for i in range(self.num_nodes):
-            for j in range(i, self.num_nodes):
-                if i == j:
-                    adjacency_matrix[i][j] = 0
+        nodes = list(range(self.num_nodes))
+        patience = 0
+        while patience < self.num_nodes * 4:
+            i, j = random.sample(nodes, 2)
+            if i != j and edge_count[i] < self.max_edge and edge_count[j] < self.max_edge:
+                # Sample a road length from a normal distribution
+                random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
+                # min road distance is 10km
+                distance = max(10, random_road_length)
+
+                # Choose a speed limit based on the sampled road length
+                if distance < (self.mu_distance - self.sigma_distance):
+                    speed_limit = random.choice(self.speed_lower)
                 else:
-                    # Skip edge creation if either node has max number of nodes
-                    if edge_count[i] >= self.max_edge or edge_count[j] >= self.max_edge:
-                        adjacency_matrix[i][j] = 0
-                        adjacency_matrix[j][i] = 0
-                        continue
+                    speed_limit = random.choice(self.speed_upper)
 
-                    # Sample a road length from a normal distribution
-                    random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
-                    # min road distance is 10km
-                    distance = max(10, random_road_length)
+                # Decide whether to create an Edge or not based on the sparsity distribution
+                edge_or_not = random.choices([0, Edge(speed_limit, distance)], weights=self.sparsity_dist)[0]
+                adjacency_matrix[i][j] = edge_or_not
+                adjacency_matrix[j][i] = edge_or_not
 
-                    # Choose a speed limit based on the sampled road length
-                    if distance < (self.mu_distance - self.sigma_distance):
-                        speed_limit = random.choice(self.speed_lower)
-                    else:
-                        speed_limit = random.choice(self.speed_upper)
+                if adjacency_matrix[i][j] and adjacency_matrix[j][i] != 0:
+                    print(i, j, adjacency_matrix[i][j])
+                    print(i, j, adjacency_matrix[j][i])
+                    edge_count[i] += 1
+                    edge_count[j] += 1
+                
+                patience = 0
+            else:
+                if edge_count[i] >= self.max_edge:
+                    print('full', i)
+                    nodes.remove(i)
+                if edge_count[j] >= self.max_edge:
+                    print('full', j)
+                    nodes.remove(j)
+                if len(nodes) <= 3:
+                    print('full', nodes)
+                    break
+                patience += 1
 
-                    # Decide whether to create an Edge or not based on the sparsity distribution
-                    edge_or_not = random.choices([0, Edge(speed_limit, distance)], weights=self.sparsity_dist)[0]
-                    adjacency_matrix[i][j] = edge_or_not
-                    adjacency_matrix[j][i] = edge_or_not
+            # Break if we've reached the desired average degree
+            graph = self.adjacency_to_graph(adjacency_matrix)
+            if self.calculate_average_degree(graph) >= self.average_degree:
+                break
 
-                    if edge_or_not != 0:
-                        edge_count[i] += 1
-                        edge_count[j] += 1
-        
         # Convert the adjacency matrix to a networkx graph for easier processing
         graph = self.adjacency_to_graph(adjacency_matrix)
 
@@ -204,6 +230,9 @@ class Map:
 
         # Convert the graph back to an adjacency matrix
         adjacency_matrix = self.graph_to_adjacency(graph)
+
+        avg_degree = self.calculate_average_degree(graph)
+        print(f"Desired Average Degree: {self.average_degree} Actual Average Degree: {avg_degree}")
 
         return adjacency_matrix
     
@@ -276,7 +305,7 @@ class Map:
     
 if __name__ == '__main__':
     # Test the graph
-    graph = Map(num_nodes=20, sparsity_dist=[0.2, 0.8]) # Creates instance of graph with 10 different nodes
+    graph = Map(num_nodes=20, average_degree=3.5) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))
