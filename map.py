@@ -178,6 +178,8 @@ class Map:
         patience = 0
         while patience < self.num_nodes * 4:
             i, j = random.sample(nodes, 2)
+            if adjacency_matrix[i][j] != 0:
+                continue
             if i != j and edge_count[i] < self.max_edge and edge_count[j] < self.max_edge:
                 # Sample a road length from a normal distribution
                 random_road_length = np.random.normal(self.mu_distance, self.sigma_distance, 1)
@@ -192,15 +194,27 @@ class Map:
 
                 # Decide whether to create an Edge or not based on the sparsity distribution
                 edge_or_not = random.choices([0, Edge(speed_limit, distance)], weights=self.sparsity_dist)[0]
+
+                if i == 3 or j == 3:
+                    print('pre 3 test')
+                    print(adjacency_matrix[3])
+                    print(edge_count[3])
+                    
+
                 adjacency_matrix[i][j] = edge_or_not
                 adjacency_matrix[j][i] = edge_or_not
 
-                if adjacency_matrix[i][j] and adjacency_matrix[j][i] != 0:
+                if edge_or_not != 0:
                     print(i, j, adjacency_matrix[i][j])
-                    print(i, j, adjacency_matrix[j][i])
+                    print(j, i, adjacency_matrix[j][i])
                     edge_count[i] += 1
                     edge_count[j] += 1
-                
+
+                    if i == 3 or j == 3:
+                        print('post 3 test')
+                        print(adjacency_matrix[3])
+                        print(edge_count[3])
+
                 patience = 0
             else:
                 if edge_count[i] >= self.max_edge:
@@ -262,7 +276,7 @@ class Map:
                 if self.adjacency[i][j] != 0:
                     graph.add_edge(i, j)
 
-        pos = nx.spring_layout(graph)  
+        pos = nx.kamada_kawai_layout(graph)  
         nx.draw(graph, pos, with_labels=True, node_color='lightblue', node_size=500, edge_color='gray')
         plt.title("Graph Visualization")
         plt.show()
@@ -305,7 +319,7 @@ class Map:
     
 if __name__ == '__main__':
     # Test the graph
-    graph = Map(num_nodes=20, average_degree=3.5) # Creates instance of graph with 10 different nodes
+    graph = Map(num_nodes=20, average_degree=2.2) # Creates instance of graph with 10 different nodes
     print("Nodes = ", graph.num_nodes) 
     # print("Graph adjacency = ",graph.adjacency) # Adjacency matrix 
     print(np.all(graph.adjacency == graph.adjacency.T))

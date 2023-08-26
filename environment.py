@@ -8,7 +8,7 @@ import random
 
 
 class Environment:
-    def __init__(self, num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, seed=28062023):
+    def __init__(self, num_nodes=10, average_degree=2, num_cars=10, seed=28062023):
         """
         Initializes the environment.
         
@@ -20,9 +20,9 @@ class Environment:
         - score (int): Evaluation metric, quantifies how well cars navigate the environment.
         """
         self.num_nodes = num_nodes
-        self.sparsity_dist = sparsity_dist
+        self.average_degree = average_degree
         self.seed = seed
-        self.map = Map(num_nodes=self.num_nodes, sparsity_dist=self.sparsity_dist, seed=self.seed)
+        self.map = Map(num_nodes=self.num_nodes, average_degree=self.average_degree, seed=self.seed)
         
         self.num_cars = num_cars
         self.cars = self.initialise_cars(self.num_cars)
@@ -72,7 +72,7 @@ class Environment:
         Returns:
         - tuple: Represents the state of the environment after reset.
         """
-        self.map = Map(num_nodes=self.num_nodes, sparsity_dist=self.sparsity_dist, seed=self.seed)
+        self.map = Map(num_nodes=self.num_nodes, average_degree=self.average_degree, seed=self.seed)
         self.cars = self.initialise_cars(num_cars=self.num_cars)
         self.controller = Controller(self.map)
 

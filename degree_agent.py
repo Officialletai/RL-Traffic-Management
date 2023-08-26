@@ -167,13 +167,13 @@ class MultiAgent:
         self.epsilon = max(self.epsilon * self.epsilon_decay_rate, self.epsilon_min)
 
 
-def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005, trial=None, patience=3, target_update_freq = 10, validation_episodes=5):
-    env = Environment(num_nodes, sparsity_dist, num_cars)
+def train_multi_agent(num_nodes=10, average_degree=2, num_cars=10, episodes=1250, epsilon_decay_rate=0.995, discount_factor=0.995, learning_rate=0.0005, trial=None, patience=3, target_update_freq = 10, validation_episodes=5):
+    env = Environment(num_nodes, average_degree, num_cars)
     env.map.draw()
 
 
     # for validation, we swap the sparsity distribution around for variance
-    validation_env = Environment(num_nodes=num_nodes, sparsity_dist=sparsity_dist, num_cars=num_cars, seed=23082023)
+    validation_env = Environment(num_nodes=num_nodes, average_degree=average_degree, num_cars=num_cars, seed=23082023)
     validation_env.map.draw()
 
 
@@ -272,7 +272,7 @@ def train_multi_agent(num_nodes=10, sparsity_dist=[0.35, 0.65], num_cars=10, epi
 
 if __name__ == "__main__":
     NUM_NODES = 20
-    SPARSITY_DIST=[73, 7]
+    AVERAGE_DEGREE=2.4
     NUM_CARS=100
     EPISODES=2500
     N_TRIALS=10
@@ -288,7 +288,7 @@ if __name__ == "__main__":
         print(f"Trial={trial.number}, Training with discount_factor={discount_factor}, learning_rate={learning_rate}, epsilon_decay_rate={epsilon_decay_rate}")
         performance = train_multi_agent(
             num_nodes=NUM_NODES, 
-            sparsity_dist=SPARSITY_DIST, 
+            average_degree=AVERAGE_DEGREE, 
             num_cars=NUM_CARS, 
             episodes=EPISODES, 
             epsilon_decay_rate=epsilon_decay_rate, 
