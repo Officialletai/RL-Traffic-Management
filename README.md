@@ -33,6 +33,6 @@ The `Car` class is another key part of the traffic network problem. Cars are ini
 
 Currently, the traffic network is generated with random edges, cars are initialised at random nodes in random queues and all features are fully functional. IQL Reinforcement learning algorithms have been applied successfully.
 
-We decided to work on a transformer to solve this problem but quickly encountered numerous problems. These problems are seen as opportunities to work on new transformer architectures, and we hope to address several limitations. As a result, no future works have been layed out for this traffic management problem.
+We decided to work on a transformer to solve this problem but quickly encountered numerous problems. These problems are seen as opportunities to work on new transformer architectures, and we hope to address several limitations. As a result, no future works have been laid out for this traffic management problem.
 
 We welcome contributions to this project. Please feel free to reach out if you're interested in collaborating or have any questions or feedback.
